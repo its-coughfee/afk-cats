@@ -87,54 +87,6 @@
     padding-bottom: 14vh;
   }
 
-  /* ── Setup screen ── */
-  #setup h2 {
-    font-size: 1.3rem;
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1.8rem;
-    color: rgba(255,255,255,0.7);
-  }
-  #setup input[type="time"] {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 2.4rem;
-    font-weight: 300;
-    padding: 0.4em 0.7em;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 12px;
-    outline: none;
-    text-align: center;
-  }
-  #setup input[type="time"]:focus {
-    border-color: rgba(255,255,255,0.4);
-  }
-  #setup button {
-    margin-top: 1.4rem;
-    padding: 0.7em 2.4em;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.25s;
-  }
-  #setup button:hover {
-    background: rgba(255,255,255,0.22);
-    border-color: rgba(255,255,255,0.4);
-  }
-
   /* ── AFK display ── */
   #afk {
     display: none;
@@ -174,11 +126,6 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.05em;
   }
-  .countdown.done {
-    color: #8cffb2;
-    font-weight: 600;
-    text-shadow: 0 0 30px rgba(140,255,178,0.3);
-  }
 
   /* ── Attribution bar ── */
   .attribution {
@@ -203,26 +150,6 @@
     text-decoration: underline;
   }
 
-  /* ── Reset button ── */
-  .reset-btn {
-    position: fixed;
-    bottom: 0.7em;
-    right: 1.2em;
-    z-index: 20;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.75rem;
-    padding: 0.4em 0.9em;
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.25s;
-  }
-  .reset-btn:hover {
-    color: rgba(255,255,255,0.6);
-    border-color: rgba(255,255,255,0.25);
-  }
 </style>
 </head>
 <body>
@@ -232,12 +159,6 @@
 <div class="overlay ui-center" id="overlay"></div>
 
 <div class="content ui-center" id="content">
-  <div id="setup">
-    <h2>I'll be back at&hellip;</h2>
-    <input type="time" id="timeInput">
-    <button onclick="go()">Go AFK</button>
-  </div>
-
   <div id="afk">
     <div class="afk-label">AFK</div>
     <div class="back-line">back at</div>
@@ -246,7 +167,6 @@
   </div>
 </div>
 
-<button class="reset-btn" id="resetBtn" style="display:none" onclick="reset()">change time</button>
 <div class="attribution" id="attribution"></div>
 
 <script>
@@ -350,62 +270,76 @@
 
   startCycling();
 
-  // ── AFK Timer Logic ──
+  // ── AFK state, driven by the bot ──
+  // The page never decides anything. It asks the Worker whether its own person
+  // is away, and draws whatever it is told. `/afk` and `/back` in Discord are
+  // the only things that change it.
+
+  const SIGN_ID = window.__SIGN_ID__ || '';
+  const TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const POLL_MS = 15 * 1000;
+
   let targetMs = null;
-  let raf = null;
+  let ticker = null;
 
-  const now = new Date();
-  const soon = new Date(now.getTime() + 15 * 60000);
-  document.getElementById('timeInput').value =
-    String(soon.getHours()).padStart(2,'0') + ':' + String(soon.getMinutes()).padStart(2,'0');
+  async function poll() {
+    if (!SIGN_ID) return;
+    try {
+      const res = await fetch(
+        `/api/sign/${SIGN_ID}?tz=${encodeURIComponent(TIMEZONE)}`,
+        { cache: 'no-store' }
+      );
+      if (!res.ok) return;                 // a blip leaves the sign as it is
+      const state = await res.json();
+      applyState(state.afk ? state.until : null);
+    } catch (e) {
+      // Offline or a hiccup: keep showing the last known state and try again.
+    }
+  }
 
-  function go() {
-    const val = document.getElementById('timeInput').value;
-    if (!val) return;
-    const [h, m] = val.split(':').map(Number);
-    const target = new Date();
-    target.setHours(h, m, 0, 0);
-    if (target.getTime() <= Date.now()) target.setDate(target.getDate() + 1);
-    targetMs = target.getTime();
+  function applyState(until) {
+    if (until === targetMs) return;
+    targetMs = until;
 
-    const display = target.toLocaleTimeString([], {
-      hour: '2-digit', minute: '2-digit', hour12: true,
-      timeZoneName: 'short'
-    });
-    document.getElementById('backTime').textContent = display;
+    const afkEl = document.getElementById('afk');
+    if (targetMs === null) {
+      if (ticker) { clearInterval(ticker); ticker = null; }
+      afkEl.style.display = 'none';        // photos only
+      return;
+    }
 
-    document.getElementById('setup').style.display = 'none';
-    document.getElementById('afk').style.display = 'block';
-    document.getElementById('resetBtn').style.display = 'block';
+    document.getElementById('backTime').textContent =
+      new Date(targetMs).toLocaleTimeString([], {
+        hour: '2-digit', minute: '2-digit', hour12: true,
+        timeZoneName: 'short'
+      });
+    afkEl.style.display = 'block';
     tick();
+    if (!ticker) ticker = setInterval(tick, 1000);
   }
 
   function tick() {
-    const diff = targetMs - Date.now();
+    if (targetMs === null) return;
     const el = document.getElementById('countdown');
-    if (diff <= 0) {
-      el.textContent = "I'm back!";
-      el.classList.add('done');
-      return;
-    }
-    const hrs  = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
-    let parts = [];
+    const diff = targetMs - Date.now();
+    // Past the return time the counter doesn't stop — it turns around and
+    // climbs, so being late stays visible.
+    el.textContent = (diff < 0 ? '+ ' : '') + duration(Math.abs(diff));
+  }
+
+  function duration(ms) {
+    const hrs  = Math.floor(ms / 3600000);
+    const mins = Math.floor((ms % 3600000) / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    const parts = [];
     if (hrs > 0) parts.push(hrs + 'h');
     parts.push(String(mins).padStart(2,'0') + 'm');
     parts.push(String(secs).padStart(2,'0') + 's');
-    el.textContent = parts.join(' ');
-    el.classList.remove('done');
-    raf = requestAnimationFrame(tick);
+    return parts.join(' ');
   }
 
-  function reset() {
-    if (raf) cancelAnimationFrame(raf);
-    document.getElementById('afk').style.display = 'none';
-    document.getElementById('resetBtn').style.display = 'none';
-    document.getElementById('setup').style.display = 'block';
-  }
+  poll();
+  setInterval(poll, POLL_MS);
 </script>
 </body>
 </html>

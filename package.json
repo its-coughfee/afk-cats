@@ -1,0 +1,14 @@
+{
+  "name": "afk-cats",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discord bot and AFK sign pages, running as one Cloudflare Worker.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

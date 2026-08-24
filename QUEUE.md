@@ -13,70 +13,6 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
-#### Worker running `/afk` and `/back`, serving each person's sign page [discord-bot]
-
-captured by you, as the whole bot idea. Split at planning into this build plus
-two `[user]` lines — [afk-accounts] for the accounts and credentials, and
-[afk-wire-up] for the deploy-and-connect steps that only run once this ships.
-
-Cloudflare Workers was chosen over an always-on server because one Worker covers
-all three jobs — receiving Discord's requests, holding the state, and serving the
-sign pages — on a free tier with nothing to install for anyone using it. Cites
-research: `resources/research/discord-slash-commands-on-cloudflare-workers.md`,
-which confirms Discord publishes its own tutorial for this and that the endpoint
-must verify an Ed25519 signature.
-
-The build does not wait on the Discord application existing. Signature
-verification reads the application's public key from configuration, so the code
-is written against a setting rather than against a value someone has to fetch
-first. That is why this sits above the line alongside [afk-accounts] rather than
-behind it.
-
-Timezone was settled here: the sign page reports the timezone of the machine it
-is open on, and `/afk 3pm` is read against that. It avoids a server-wide timezone
-setting and avoids asking anyone to type an offset. SPEC carries the sentence.
-
-Red flag · State: cleared
-
-The risk was that a readable sign address (`/sign/alex`) lets anyone who guesses
-it check whether a named person is at their desk, unannounced — presence data on
-a semi-public server. Designed out rather than accepted: addresses are long
-random strings, and the bot will tell you yours on request. Rejected: readable
-addresses, which are easier to type and share but expose everyone's status to
-everyone.
-
---- Build block ---
-Changes:
-- A new Cloudflare Worker project at the repo root (`src/`, `wrangler.toml`,
-  `package.json`). One Worker, three responsibilities.
-- Interactions endpoint: verifies Discord's Ed25519 signature on every request
-  and returns 401 when it fails, answers Discord's PING, and handles three slash
-  commands — `/afk <time>` (records the person as away until that time), `/back`
-  (clears it), one that replies with the caller's own sign address, and one that
-  throws that address away and issues a fresh one, for when it leaks. All replies
-  carrying an address are private to the caller, so the bot never posts one into
-  a channel.
-- State: who is AFK and until when, plus each person's random sign id, in Workers
-  KV. Check KV's free-tier limits while building and say in the LOG entry what
-  they are.
-- Sign page: `afk-sign_1.html` becomes the page the Worker serves at
-  `/sign/<random-id>`. It keeps the existing cat photos, the crossfade and the
-  photographer credit unchanged, and gains: the **AFK** heading, "back at" plus
-  the time, a live counter, and a poll to the Worker for its own person's state.
-  When the return time passes the counter flips to counting up and keeps
-  climbing. When the person is not AFK the page shows photos only.
-- The page sends its own browser timezone to the Worker, which is what `/afk 3pm`
-  resolves against.
-Acceptance: with the Worker deployed and a fake state row written by hand,
-opening a sign address shows the AFK screen counting down; letting the time pass
-turns the count upward rather than stopping; clearing the row returns the page to
-photos only. The interactions endpoint rejects an unsigned request with a 401.
-Red flag: cleared
-Refused: an always-on server (Railway/Render) — same setup effort, ongoing cost,
-and three moving parts instead of one.
-Refused: readable sign addresses — see the red flag above.
---- End build block ---
-
 #### [user] Create the Discord application and the Cloudflare account [afk-accounts]
 
 Split out of [discord-bot]. Both accounts are things only you can create — they
@@ -148,4 +84,71 @@ reply rather than "application did not respond".
 > through these with you and decides each one's fate — keep it (move it up to
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
+
+#### Last session advises processing [afk-accounts] next [forward-advisory]
+The Worker shipped, so the project's next move is entirely about getting it
+online, and two things stand in the way of that happening by itself. First,
+[afk-accounts] sits at the top of the cleared work with no walkthrough written
+into it, so a build run reaches it and halts rather than walking anyone through
+anything — writing its steps is the unblocking move. Second, [afk-wire-up] is
+held below the line naming [discord-bot] as its blocker, and that blocker has now
+shipped, so it is ready to be lifted; nothing else was holding it.
+
+Checked for overlap: three captures are waiting to be sorted —
+[sign-page-eyeball], [spec-address-sentences] and [ignore-build-dirs]. None of
+them contradicts or complicates the account work. [ignore-build-dirs] is worth
+taking early anyway, since the deploy step runs an install that would otherwise
+sweep a large folder into the next commit, and [sign-page-eyeball] belongs
+immediately after the deploy rather than before it.
+
+#### [user] Look at a live sign page and check the countdown behaves [sign-page-eyeball]
+The Worker build was tested end-to-end against a stand-in for Cloudflare's
+storage, which covers the bot, the private addresses and the state the page is
+served. What that cannot cover is the page itself in a real browser: that the
+AFK screen appears over the photos, that the counter turns around and climbs
+once the return time passes rather than stopping, and that clearing it puts the
+page back to photos only. Those are eyes-on-a-screen checks, so they are the
+user's. Filed during the [discord-bot] build; it can only run once the sign is
+live, so it comes after [afk-wire-up].
+
+#### Two sentences SPEC owes about the sign address and the first `/afk` [spec-address-sentences]
+The [discord-bot] build put two things into the product that SPEC does not yet
+say. First, a person can throw their sign address away and be issued a fresh
+one, for when it leaks — SPEC currently says only that the bot will tell you
+yours again. Second, the timezone reaches the bot from the sign page, so a
+person's very first `/afk` is refused with a nudge to open their sign page once;
+after that it never comes up again. Both are ordinary product truth rather than
+build detail, and a build does not write SPEC, so they are filed here for the
+next planning pass. SPEC lags by these two sentences until then.
+
+#### Keep `node_modules` and `.wrangler` out of git [ignore-build-dirs]
+The [discord-bot] build added a `package.json`, so the first `npm install` will
+drop a large `node_modules` folder in the project root, and running the Cloudflare
+tooling leaves a `.wrangler` cache beside it. Neither belongs in the repository
+and `.gitignore` currently lists neither, so the first commit after the deploy
+step would sweep thousands of files in. One line each in `.gitignore` settles it.
+Noticed during the [discord-bot] build, which did not touch `.gitignore`, so it
+is filed rather than folded in.
+
+#### Decide whether the sign's up-to-a-minute lag behind `/afk` matters [kv-read-staleness]
+Cloudflare's key-value storage serves reads that can be up to sixty seconds
+stale, so a sign page that is already open may keep showing photos for as much as
+a minute after `/afk` is typed, and may keep counting for as much as a minute
+after `/back`. Found while reading the free-tier limits during the [discord-bot]
+build, and recorded there. It may be invisible in practice — the delay is a
+ceiling rather than the usual case — so this is a judgement to make once someone
+has watched a real sign respond, not a fix to design in advance. If it does
+matter, the fixes are real but each costs something: a shorter poll interval buys
+nothing because the staleness is in the storage rather than the poll, so the
+answer would be a different storage or a push channel.
+
+#### Have the bot say "BST" rather than "GMT+1" when it confirms a time [timezone-abbreviation]
+The bot's confirmation currently reads "AFK until 3:00 PM GMT+1". It is correct
+and it is not how anyone writes it — "BST" is the name a British reader expects,
+and the same goes for other zones with familiar abbreviations. It comes from
+formatting the time for a US English reader, which is the default the Worker
+falls back to; the fix is about which locale the time is formatted for, and needs
+a moment's thought about what to do for a person whose zone has no well-known
+abbreviation. Noticed while testing during the [discord-bot] build and left
+alone, since it is presentation rather than behaviour.
 

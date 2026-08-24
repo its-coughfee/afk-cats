@@ -1,0 +1,24 @@
+name = "afk-cats"
+main = "src/index.js"
+compatibility_date = "2026-08-24"
+
+# The sign page is bundled as a text module so afk-sign_1.html stays the one
+# copy of the page — edit it there, not in a duplicate inside src/.
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+
+# Who is AFK, until when, and each person's random sign id.
+# Fill in `id` with the namespace created at deploy time.
+[[kv_namespaces]]
+binding = "AFK_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+# Discord's public key for this application. Public by nature, so it lives here
+# rather than in a secret. The bot token is not needed by this Worker at all.
+DISCORD_PUBLIC_KEY = "REPLACE_WITH_DISCORD_PUBLIC_KEY"
+
+# Optional. Leave unset and sign addresses are built from the incoming request's
+# own origin, which is right in every ordinary case.
+# SIGN_BASE_URL = "https://afk-cats.example.workers.dev"
