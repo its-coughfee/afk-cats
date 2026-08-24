@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFK</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #fff;
+  }
+
+  /* ── Background layers for crossfade ── */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 2s ease-in-out;
+    opacity: 0;
+    z-index: 0;
+  }
+  .bg-layer.active { opacity: 1; }
+
+  /* Dark overlay for text readability */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    transition: background 2s ease-in-out;
+  }
+  .overlay.ui-top {
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.6) 0%,
+      rgba(0,0,0,0.15) 45%,
+      rgba(0,0,0,0.15) 60%,
+      rgba(0,0,0,0.55) 100%
+    );
+  }
+  .overlay.ui-center {
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.35) 0%,
+      rgba(0,0,0,0.25) 35%,
+      rgba(0,0,0,0.25) 65%,
+      rgba(0,0,0,0.55) 100%
+    );
+  }
+  .overlay.ui-bottom {
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.35) 0%,
+      rgba(0,0,0,0.15) 40%,
+      rgba(0,0,0,0.25) 55%,
+      rgba(0,0,0,0.65) 100%
+    );
+  }
+
+  /* ── Content container — shifts based on photo ── */
+  .content {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: justify-content 0.8s;
+  }
+  .content.ui-top {
+    justify-content: flex-start;
+    padding-top: 10vh;
+  }
+  .content.ui-center {
+    justify-content: center;
+  }
+  .content.ui-bottom {
+    justify-content: flex-end;
+    padding-bottom: 14vh;
+  }
+
+  /* ── Setup screen ── */
+  #setup h2 {
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    color: rgba(255,255,255,0.7);
+  }
+  #setup input[type="time"] {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 2.4rem;
+    font-weight: 300;
+    padding: 0.4em 0.7em;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    outline: none;
+    text-align: center;
+  }
+  #setup input[type="time"]:focus {
+    border-color: rgba(255,255,255,0.4);
+  }
+  #setup button {
+    margin-top: 1.4rem;
+    padding: 0.7em 2.4em;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  #setup button:hover {
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  /* ── AFK display ── */
+  #afk {
+    display: none;
+  }
+
+  .afk-label {
+    font-size: 7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-indent: 0.25em;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(0,0,0,0.5);
+    margin-bottom: 0.1em;
+  }
+
+  .back-line {
+    font-size: 1.2rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0.3em;
+  }
+
+  .back-time {
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(0,0,0,0.4);
+    margin-bottom: 1em;
+  }
+
+  .countdown {
+    font-size: 2rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+  }
+  .countdown.done {
+    color: #8cffb2;
+    font-weight: 600;
+    text-shadow: 0 0 30px rgba(140,255,178,0.3);
+  }
+
+  /* ── Attribution bar ── */
+  .attribution {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 0.7em 1.2em;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    text-align: left;
+    transition: opacity 2s ease-in-out;
+  }
+  .attribution a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+  }
+  .attribution a:hover {
+    color: rgba(255,255,255,0.85);
+    text-decoration: underline;
+  }
+
+  /* ── Reset button ── */
+  .reset-btn {
+    position: fixed;
+    bottom: 0.7em;
+    right: 1.2em;
+    z-index: 20;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.75rem;
+    padding: 0.4em 0.9em;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .reset-btn:hover {
+    color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.25);
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer" id="bg1"></div>
+<div class="bg-layer" id="bg2"></div>
+<div class="overlay ui-center" id="overlay"></div>
+
+<div class="content ui-center" id="content">
+  <div id="setup">
+    <h2>I'll be back at&hellip;</h2>
+    <input type="time" id="timeInput">
+    <button onclick="go()">Go AFK</button>
+  </div>
+
+  <div id="afk">
+    <div class="afk-label">AFK</div>
+    <div class="back-line">back at</div>
+    <div class="back-time" id="backTime"></div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</div>
+
+<button class="reset-btn" id="resetBtn" style="display:none" onclick="reset()">change time</button>
+<div class="attribution" id="attribution"></div>
+
+<script>
+  // ── Cat photos from Pexels ──
+  // ui: where to place the UI so it doesn't cover the cat's face
+  //   "top"    = cat is center/bottom of frame
+  //   "center" = cat is at edges, center is clear
+  //   "bottom" = cat is top/center-top of frame
+  const photos = [
+    { id: 7061576,  ext:'jpeg', photographer:'Crisher P.H.',        username:'crisher',                       ui:'bottom' },  // tabby on rock, fills center
+    { id: 1041099,  ext:'jpeg', photographer:'lilartsy',             username:'lilartsy',                      ui:'bottom' },  // cat peeks through yellow blossoms, center
+    { id: 243770,   ext:'jpeg', photographer:'Pixabay',              username:'theglory-77669',                ui:'top' },     // cat among autumn leaves, lower half
+    { id: 17041911, ext:'jpeg', photographer:'Ana Tinca',            username:'ana-tinca-264849644',           ui:'top' },     // calico in flowers, lower center
+    { id: 14072059, ext:'jpeg', photographer:'Selcuk Calisir',      username:'selcuk-calisir-56680108',       ui:'top' },     // three cats on rocks, center-low
+    { id: 14518699, ext:'jpeg', photographer:'Anna Astakhova',      username:'anna-astakhova-75707674',       ui:'top' },     // two cats by sea, lower half
+    { id: 31192222, ext:'jpeg', photographer:'Sezgin Kaya',         username:'sezgin-kaya-81430309',          ui:'top' },     // fluffy cats sunset, lower center
+    { id: 20041689, ext:'jpeg', photographer:'Eyüpcan Timur',       username:'eyupcan-timur-424989336',       ui:'top' },     // cat silhouettes at sunset, bottom
+    { id: 38838989, ext:'jpeg', photographer:'Mytho',               username:'mytho',                         ui:'bottom' },  // cats on garden fence, center
+    { id: 11931799, ext:'jpeg', photographer:'Lubomir Vladikov',    username:'lubomir-vladikov-218031986',    ui:'top' },     // ginger cats in garden path, lower
+    { id: 16681861, ext:'jpeg', photographer:'Molnár Tamás',        username:'molnartamasphotography',        ui:'top' },     // cat sleeping on ground, bottom
+    { id: 38509612, ext:'jpeg', photographer:'Acrypt Photography',  username:'acrypt-photography-584977681',  ui:'top' },     // cat lounging in garden, center-low
+    { id: 39101867, ext:'jpeg', photographer:'Nurullah Ü.',         username:'nurullah-u-2150008420',         ui:'top' },     // cat silhouette Istanbul, bottom half
+    { id: 25650506, ext:'jpeg', photographer:'İsmail Akçayır',      username:'i-smail-akcayir-155326478',     ui:'top' },     // ginger cat on coastal rocks, center-low
+    { id: 18181312, ext:'jpeg', photographer:'Harun',               username:'harun-15114174',                ui:'top' },     // tabby by seaside, center-low
+    { id: 38734656, ext:'jpeg', photographer:'Nekibek',             username:'nekibek',                       ui:'top' },     // Maine Coon sunset, lower center
+    { id: 4051431,  ext:'jpeg', photographer:'Gottapics',           username:'gottapics',                     ui:'bottom' },  // cats among cacti, center
+    { id: 37769733, ext:'jpeg', photographer:'Ev4r137',             username:'ev4r137',                       ui:'bottom' },  // white cat on tree stump, center
+    { id: 37283805, ext:'jpeg', photographer:'Muffinlandge',        username:'muffinlandge',                  ui:'bottom' },  // black and white cat, center
+    { id: 38642727, ext:'jpeg', photographer:'Mohammad J.',         username:'mohammad-j-2147534405',         ui:'top' },     // tabby in autumn leaves, center-low
+  ];
+
+  function imgUrl(p) {
+    return `https://images.pexels.com/photos/${p.id}/pexels-photo-${p.id}.${p.ext}?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop`;
+  }
+  function profileUrl(p) { return `https://www.pexels.com/@${p.username}/`; }
+  function photoUrl(p) { return `https://www.pexels.com/photo/${p.id}/`; }
+
+  let order = [];
+  let currentIdx = 0;
+  let activeBg = 1;
+  let cycleTimer = null;
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function preloadImage(url) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
+  function setUIPosition(pos) {
+    const content = document.getElementById('content');
+    const overlay = document.getElementById('overlay');
+    content.className = 'content ui-' + pos;
+    overlay.className = 'overlay ui-' + pos;
+  }
+
+  function showPhoto(idx) {
+    const photo = photos[order[idx]];
+    const url = imgUrl(photo);
+
+    const incoming = activeBg === 1 ? 'bg2' : 'bg1';
+    const outgoing = activeBg === 1 ? 'bg1' : 'bg2';
+
+    const inEl = document.getElementById(incoming);
+    inEl.style.backgroundImage = `url(${url})`;
+
+    preloadImage(url).then(() => {
+      inEl.classList.add('active');
+      document.getElementById(outgoing).classList.remove('active');
+      activeBg = activeBg === 1 ? 2 : 1;
+      setUIPosition(photo.ui);
+    });
+
+    const attr = document.getElementById('attribution');
+    attr.innerHTML = `Photo by <a href="${profileUrl(photo)}" target="_blank" rel="noopener">${photo.photographer}</a> on <a href="${photoUrl(photo)}" target="_blank" rel="noopener">Pexels</a>`;
+  }
+
+  function nextPhoto() {
+    currentIdx = (currentIdx + 1) % order.length;
+    if (currentIdx === 0) order = shuffle([...Array(photos.length).keys()]);
+    showPhoto(currentIdx);
+  }
+
+  function startCycling() {
+    order = shuffle([...Array(photos.length).keys()]);
+    currentIdx = 0;
+    showPhoto(currentIdx);
+    cycleTimer = setInterval(nextPhoto, 20 * 60 * 1000);
+  }
+
+  startCycling();
+
+  // ── AFK Timer Logic ──
+  let targetMs = null;
+  let raf = null;
+
+  const now = new Date();
+  const soon = new Date(now.getTime() + 15 * 60000);
+  document.getElementById('timeInput').value =
+    String(soon.getHours()).padStart(2,'0') + ':' + String(soon.getMinutes()).padStart(2,'0');
+
+  function go() {
+    const val = document.getElementById('timeInput').value;
+    if (!val) return;
+    const [h, m] = val.split(':').map(Number);
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target.getTime() <= Date.now()) target.setDate(target.getDate() + 1);
+    targetMs = target.getTime();
+
+    const display = target.toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', hour12: true,
+      timeZoneName: 'short'
+    });
+    document.getElementById('backTime').textContent = display;
+
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('afk').style.display = 'block';
+    document.getElementById('resetBtn').style.display = 'block';
+    tick();
+  }
+
+  function tick() {
+    const diff = targetMs - Date.now();
+    const el = document.getElementById('countdown');
+    if (diff <= 0) {
+      el.textContent = "I'm back!";
+      el.classList.add('done');
+      return;
+    }
+    const hrs  = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    let parts = [];
+    if (hrs > 0) parts.push(hrs + 'h');
+    parts.push(String(mins).padStart(2,'0') + 'm');
+    parts.push(String(secs).padStart(2,'0') + 's');
+    el.textContent = parts.join(' ');
+    el.classList.remove('done');
+    raf = requestAnimationFrame(tick);
+  }
+
+  function reset() {
+    if (raf) cancelAnimationFrame(raf);
+    document.getElementById('afk').style.display = 'none';
+    document.getElementById('resetBtn').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  }
+</script>
+</body>
+</html>
