@@ -13,149 +13,6 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
-#### Keep `node_modules` and `.wrangler` out of git [ignore-build-dirs]
-The [discord-bot] build added a `package.json`, so the first `npm install` will
-drop a large `node_modules` folder in the project root, and running the Cloudflare
-tooling leaves a `.wrangler` cache beside it. Neither belongs in the repository
-and `.gitignore` currently lists neither, so the first commit after the deploy
-step would sweep thousands of files in. One line each in `.gitignore` settles it.
-Noticed during the [discord-bot] build, which did not touch `.gitignore`, so it
-is filed rather than folded in.
-
-Checked at planning time rather than taken on trust: `.gitignore` currently holds
-`.throughliner/` and `INBOX/` and nothing else, and neither `node_modules` nor
-`.wrangler` exists on disk yet. So nothing has been swept in and neither folder
-was ever committed — this is preventive, and no history needs rewriting. Kept and
-cleared ahead of the account and deploy work, since the install that creates the
-folder happens during that work.
-
---- Build block ---
-Changes: `.gitignore` gains two lines, `node_modules/` and `.wrangler/`. No other
-file changes and nothing is removed from git history.
-Acceptance: after an `npm install` and a `wrangler` run, `git status` shows
-neither folder as untracked.
---- End build block ---
-
-#### Have the bot say "BST" rather than "GMT+1" when it confirms a time [timezone-abbreviation]
-The bot's confirmation currently reads "AFK until 3:00 PM GMT+1". It is correct
-and it is not how anyone writes it — "BST" is the name a British reader expects,
-and the same goes for other zones with familiar abbreviations. It comes from
-formatting the time for a US English reader, which is the default the Worker
-falls back to; the fix is about which locale the time is formatted for, and needs
-a moment's thought about what to do for a person whose zone has no well-known
-abbreviation. Noticed while testing during the [discord-bot] build and left
-alone, since it is presentation rather than behaviour.
-
-Settled on 2026-08-25 by testing `Intl` directly rather than reasoning about it,
-which is what the item was waiting on. No single locale knows every zone's
-abbreviation — each knows its own region's. `en-GB` gives BST for London and CEST
-for Paris; `en-US` gives EDT and PDT for New York and Los Angeles; `en-AU` gives
-AEST for Sydney and NZST for Auckland. Those three cover the English-speaking
-world. Kolkata and Tokyo return `GMT+5:30` and `GMT+9` in every locale, because
-those abbreviations are not in the data at all — which answers the open question
-about zones with no familiar short name: the fallback is exactly what the bot
-prints today, so nobody's confirmation gets worse.
-
-Ordering: build this BEFORE [worker-test-suite], which splits `src/index.js` in
-two and would move `formatInZone` out from under the line reference below.
-
-Refused: switching the whole formatter to `en-GB`. It fixes London and breaks New
-York, which drops from `EDT` to `GMT-4`, and it changes the clock to 24-hour as a
-side effect. The zone name has to be looked up separately from the time.
-
---- Build block ---
-Changes: `formatInZone` in `src/index.js` (around line 327). The time keeps being
-formatted for a US English reader, so `3:00 PM` is unchanged. The zone name is
-looked up separately: try `en-US`, `en-GB` and `en-AU` in turn, take the first
-whose `timeZoneName` is letters rather than a `GMT±` string, and fall back to the
-current offset form when none is. No other file changes; the project has no test
-file and this does not add one.
-Acceptance: running the function gives "3:00 PM BST" for `Europe/London`, "EDT"
-for `America/New_York`, "AEST" for `Australia/Sydney`, and an unchanged
-"GMT+5:30" for `Asia/Kolkata`.
---- End build block ---
-
-#### Add the script that registers the slash commands with Discord [register-slash-commands]
-
-Found on 2026-08-25 while sharpening [afk-wire-up]'s walkthrough. The Worker
-answers `/afk`, `/back`, `/mysign` and `/newsign` once Discord asks it, but
-nothing in the project ever tells Discord that those commands exist — there is no
-registration script in `src/` and no command for one in `package.json`. Without
-it the deploy succeeds, the bot joins the server, and typing `/` offers nothing,
-which reads as a broken deploy rather than a missing step.
-
-Registration is a one-off call to Discord's API carrying the bot token. The token
-is the one secret in this project that must never reach the repo or this chat, so
-the script reads it from the environment at the moment it runs and the user runs
-the script themselves. Nothing about the token is stored.
-
-The four commands and their shapes come from `src/index.js`: `afk` takes one
-required string option named `time` — the name the handler reads at line 72 —
-and the other three take no options at all.
-
-Refused: registering the commands from inside the Worker on first request. It
-would need the bot token as a Worker secret, which is a standing copy of the
-project's one real secret sitting in Cloudflare, to save a step run once.
-
---- Build block ---
-Changes: a new `scripts/register-commands.mjs` that PUTs the four command
-definitions to Discord's global application-commands endpoint, reading
-`DISCORD_APPLICATION_ID` and `DISCORD_TOKEN` from the environment and exiting
-with a clear message naming whichever is missing. `package.json` gains a
-`register` entry under `scripts` that runs it. `src/index.js` is not touched.
-Acceptance: run with both variables set and Discord returns success listing the
-four commands; run with either unset and it stops with a message saying which one
-is missing rather than a stack trace.
---- End build block ---
-
-#### Give the Worker a test suite it keeps [worker-test-suite]
-
-Raised on 2026-08-25 during a re-scan of the planning chat. The [discord-bot]
-build tested the Worker end to end against a stand-in for Cloudflare's storage,
-but that testing happened in the chat and left nothing behind: there is no test
-file, and `package.json` has no test command. So every later change is verified by
-hand or not at all, and the work of building that stand-in was thrown away. It
-surfaced while writing [timezone-abbreviation], whose build block had to say the
-project has no test file and this does not add one.
-
-One thing stands in the way, checked rather than assumed: `src/index.js` imports
-the sign page as a text module (`import SIGN_HTML from '../afk-sign_1.html'`),
-which is a Cloudflare build feature. Plain Node cannot import HTML, so the file
-cannot be loaded by a test as it stands. Node 24 is installed and ships a test
-runner, so everything else is already available.
-
-Refused: Cloudflare's Vitest plugin, which runs tests inside the real Workers
-runtime and would honour the HTML import and give genuine storage rather than a
-fake. It is the supported route and it is the better fidelity. It lost on cost:
-it adds a handful of dependencies to a project that currently has one, for logic
-that is almost all pure. Worth revisiting if the fake storage ever starts lying
-about something that matters. Choosing it now would also have meant looking up
-its current setup, which had not been done.
-
-The split is a side effect of wanting tests, and that is named rather than
-glossed: working code is being restructured to make it loadable. It earns its
-place anyway, because the file currently does the wiring and the thinking in one
-place.
-
-Ordering: build this AFTER [timezone-abbreviation], which edits `formatInZone`
-where it sits today. Doing the split first would move that function and leave the
-other item pointing at a line that no longer holds it.
-
---- Build block ---
-Changes: `src/index.js` splits in two. The logic moves to a new `src/worker.js`
-with no HTML import, taking the page's text as a parameter; `src/index.js` shrinks
-to the HTML import plus the wiring that hands it over, and keeps the default
-export Cloudflare loads. A new `test/worker.test.mjs` runs under Node's built-in
-runner against a fake storage object — a plain Map behind the same `get` and `put`
-the Worker calls. `package.json` gains a `test` entry running `node --test`.
-Acceptance: `npm test` passes, covering the time parsing (`3pm`, `15:00`, junk),
-the next-occurrence rule that makes `/afk 9am` at 10am mean tomorrow, the zone
-maths across a DST boundary, `formatInZone`'s abbreviations, sign-id generation
-and validation, and the four commands driven through the handler against the fake
-storage. The Ed25519 signature check is covered by signing a body with a
-generated key pair and asserting a bad signature gives 401.
---- End build block ---
-
 #### [user] Create the Discord application and the Cloudflare account [afk-accounts]
 
 Split out of [discord-bot]. Both accounts are things only you can create — they
@@ -330,23 +187,6 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
-#### Last session advises processing [ignore-build-dirs] next [forward-advisory]
-The cleared region holds four builds and then a step only you can run, in that
-order, and they are meant to be taken top to bottom. [ignore-build-dirs] is first
-because the deploy work runs an install that creates the folder it excludes.
-
-Two things a fresh session would not see from a quick read. A build run will halt
-at [afk-accounts] and build nothing past it, because that item is yours to run —
-that is the run ending as designed, not a failure. And [timezone-abbreviation]
-must be built before [worker-test-suite]: the test work splits `src/index.js` and
-would move the function the other item edits. That ordering is written into both
-items, so following the queue's own order is enough.
-
-Checked for overlap: one capture is waiting to be sorted, [kv-read-staleness]. It
-does not touch any of the cleared work — it waits on a measurement that
-[sign-page-browser-check] will take once the sign is live, so nothing about it
-blocks a build now.
-
 #### Decide whether the sign's up-to-a-minute lag behind `/afk` matters [kv-read-staleness]
 Cloudflare's key-value storage serves reads that can be up to sixty seconds
 stale, so a sign page that is already open may keep showing photos for as much as
@@ -366,4 +206,41 @@ it — that run now records how many seconds the page actually took to flip afte
 `/afk` and after `/back`. Sixty seconds is a ceiling rather than the usual case,
 so two real numbers replace the guess. Whether the lag matters is then yours to
 judge, and this item comes back with the numbers in hand.
+
+#### Give [afk-accounts] the walkthrough it is missing [afk-accounts-walkthrough]
+The 2026-08-25 build run stopped on [afk-accounts] rather than driving it. The
+item is cleared to run and tagged as user work, but it carries no walkthrough at
+all, so there were no steps to hand over and no observable check to confirm it
+against. A run reaching it will halt the same way every time until the steps are
+written. What is needed is the actual clicking: where the Discord application is
+created, which page carries the application id, the public key and the token,
+what the Cloudflare sign-up asks for, and what the user should see when each half
+is done.
+
+#### Have [afk-wire-up] check the two things this build could not [first-deploy-checks]
+Two checks from the 2026-08-25 build could not be run and have no other home, so
+they are filed here rather than left in a log entry nobody reads at planning
+time. First, [worker-test-suite] split `src/index.js` into a thin wrapper plus
+`src/worker.js`, and nothing has built that wrapper since: the HTML import it
+still carries is a Cloudflare build feature, so only a real `wrangler` build
+proves the wiring survived the split. Second, [register-slash-commands]'s script
+was only ever run with its environment variables missing, which is the path that
+stops with a message; the success path needs a real Discord application id and
+token, which do not exist yet. Both are answered by the first deploy, so
+[afk-wire-up]'s walkthrough should name them as things to look for rather than
+leaving them to be noticed if something breaks.
+
+#### Last session advises processing [afk-accounts-walkthrough] next [forward-advisory]
+This replaces the previous note, which advised processing [ignore-build-dirs] —
+that work has since been built. The build run of 2026-08-25 shipped the four
+cleared build items and then stopped: the next item in the cleared region is
+[afk-accounts], and it carries no walkthrough, so a build run reaches it, has no
+steps to hand over, and stops there having built nothing past it. Writing those
+steps is what lets the queue move again, and everything still held below the line
+waits on the accounts existing.
+
+Nothing else waiting to be sorted overlaps that work. [first-deploy-checks] adds
+two things for [afk-wire-up]'s walkthrough to look for and does not change what
+[afk-accounts] is; [kv-read-staleness] was already deferred as undescribable
+until someone measures it.
 

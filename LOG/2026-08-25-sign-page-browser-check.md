@@ -1,4 +1,4 @@
-# [HASH] — Split the sign eyeball check after finding most of it was Claude's to run, and cleared a red flag about the address by designing the exposure out
+# 1cd6a89 — Split the sign eyeball check after finding most of it was Claude's to run, and cleared a red flag about the address by designing the exposure out
 
 [sign-page-eyeball] had been filed during the [discord-bot] build as user work,
 on the reasoning that checking a page in a browser needs eyes. The capability

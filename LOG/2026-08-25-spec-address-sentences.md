@@ -1,4 +1,4 @@
-# [HASH] — Wrote the two sentences SPEC owed about throwing away a leaked sign address and the first `/afk`, then deleted the item that carried them
+# 1cd6a89 — Wrote the two sentences SPEC owed about throwing away a leaked sign address and the first `/afk`, then deleted the item that carried them
 
 The [discord-bot] build had put two behaviours into the product that SPEC did not
 describe, and filed them for planning rather than writing them itself. Both were

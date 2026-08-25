@@ -1,4 +1,4 @@
-# [HASH] — Kept a test suite for the Worker, choosing Node's own runner over Cloudflare's Vitest plugin and accepting a file split as the price
+# 1cd6a89 — Kept a test suite for the Worker, choosing Node's own runner over Cloudflare's Vitest plugin and accepting a file split as the price
 
 Raised by the user asking for a re-scan of the chat to be processed rather than
 filed. The [discord-bot] build had tested the Worker end to end against a stand-in

@@ -1,4 +1,4 @@
-# [HASH] — Deferred the storage-lag decision rather than keeping it, and wired the measurement that would settle it into the browser check
+# 1cd6a89 — Deferred the storage-lag decision rather than keeping it, and wired the measurement that would settle it into the browser check
 
 The item asks whether the sign's up-to-a-minute lag behind `/afk` matters. It
 could not be kept, and the reason is worth stating precisely: what gets built

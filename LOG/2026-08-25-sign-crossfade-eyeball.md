@@ -1,4 +1,4 @@
-# [HASH] — Kept the photo crossfade as the user's own check, being the half of the sign eyeball that genuinely cannot be handed to a tool
+# 1cd6a89 — Kept the photo crossfade as the user's own check, being the half of the sign eyeball that genuinely cannot be handed to a tool
 
 The reasoning for the split is recorded in 2026-08-25-sign-page-browser-check.md
 and is not repeated here. What kept this half with the user is specific to it: the

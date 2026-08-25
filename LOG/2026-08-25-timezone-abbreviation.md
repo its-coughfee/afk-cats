@@ -1,4 +1,4 @@
-# [HASH] — Settled the timezone-abbreviation item by testing `Intl` rather than reasoning about it, which answered the open question that had been holding it back
+# 1cd6a89 — Settled the timezone-abbreviation item by testing `Intl` rather than reasoning about it, which answered the open question that had been holding it back
 
 The item had been filed with a question left open: what to do for a person whose
 zone has no well-known abbreviation. That question is about what a library

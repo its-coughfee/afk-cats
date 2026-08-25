@@ -1,4 +1,4 @@
-# [HASH] — Sharpened the deploy walkthrough as the item itself asked, correcting two instructions that were wrong against the Worker's own configuration
+# 1cd6a89 — Sharpened the deploy walkthrough as the item itself asked, correcting two instructions that were wrong against the Worker's own configuration
 
 The item carried an instruction to itself: the walkthrough is rough, sharpen it at
 the planning run after [discord-bot] ships. That build has shipped, so this was

@@ -1,4 +1,4 @@
-# [HASH] — Kept and cleared the work that keeps `node_modules` and `.wrangler` out of git, after checking neither folder had been committed
+# 1cd6a89 — Kept and cleared the work that keeps `node_modules` and `.wrangler` out of git, after checking neither folder had been committed
 
 The capture claimed `.gitignore` listed neither folder and that the first commit
 after the deploy would sweep thousands of files in. Both halves were checked

@@ -1,4 +1,4 @@
-# [HASH] — Found that nothing in the project registers the slash commands with Discord, and filed the script that does it as cleared work
+# 1cd6a89 — Found that nothing in the project registers the slash commands with Discord, and filed the script that does it as cleared work
 
 This was found while sharpening [afk-wire-up]'s walkthrough, by checking what each
 step would actually run rather than trusting the step's own description. The

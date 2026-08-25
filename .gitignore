@@ -1,2 +1,4 @@
 .throughliner/
 INBOX/
+node_modules/
+.wrangler/
