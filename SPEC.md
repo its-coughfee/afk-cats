@@ -38,10 +38,13 @@ the rest.
   state, and shows the ordinary photo view when they aren't AFK.
 - **The address is private.** A sign's address is long and random rather than
   readable, so nobody can find out whether you are at your desk by guessing it.
-  Ask the bot and it tells you yours again.
+  Ask the bot and it tells you yours again. If it gets out, you can throw it away
+  and be issued a fresh one — the old address stops working the moment you do.
 - **Your time, not the server's.** `/afk 3pm` means three in the afternoon where
   you are. The sign knows the timezone of the machine it is open on, and the time
-  you type is read against that.
+  you type is read against that. That is why the very first `/afk` from someone
+  who has never opened their sign page is refused, with a nudge to open it once;
+  after that the bot knows their timezone and it never comes up again.
 
 ## Principles
 
