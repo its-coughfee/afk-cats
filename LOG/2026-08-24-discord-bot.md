@@ -1,4 +1,4 @@
-# [HASH] — The bot and the sign pages built as one Cloudflare Worker, with the sign page converted from a manual form to a bot-driven display
+# f06bdc3 — The bot and the sign pages built as one Cloudflare Worker, with the sign page converted from a manual form to a bot-driven display
 
 The whole point of this item was to make the AFK sign one click away instead of
 something opened and filled in by hand, and that is what the Worker does. It
