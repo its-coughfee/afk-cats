@@ -1,4 +1,4 @@
-# [HASH] — [first-deploy-checks] retired into [afk-wire-up]: both checks written into the deploy walkthrough's steps 5 and 6 rather than kept as a work item
+# 6ef32df — [first-deploy-checks] retired into [afk-wire-up]: both checks written into the deploy walkthrough's steps 5 and 6 rather than kept as a work item
 
 The item carried two things the 2026-08-25 build could not prove, and asked that
 the deploy walkthrough name them as things to look for. Both claims were checked

@@ -1,4 +1,4 @@
-# [HASH] — [afk-accounts-walkthrough] deleted: the steps it asked for had been in the queue all along, and the real fault was a heading the build view could not match
+# 6ef32df — [afk-accounts-walkthrough] deleted: the steps it asked for had been in the queue all along, and the real fault was a heading the build view could not match
 
 This item was filed after the 2026-08-25 build run halted on [afk-accounts]
 reporting that it carried no walkthrough. Reading the item as it stood showed a

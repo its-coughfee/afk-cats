@@ -1,4 +1,4 @@
-# [HASH] — [kv-read-staleness] merged into [sign-page-browser-check]: one item now carries both the measurement and the judgement it feeds
+# 6ef32df — [kv-read-staleness] merged into [sign-page-browser-check]: one item now carries both the measurement and the judgement it feeds
 
 The item asked whether the sign's up-to-a-minute lag behind `/afk` matters. It
 had already been deferred once, on 2026-08-25, for the right reason: what gets

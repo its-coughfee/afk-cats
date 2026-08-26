@@ -13,45 +13,6 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
-#### [user] Create the Discord application and the Cloudflare account [afk-accounts]
-
-Split out of [discord-bot]. Both accounts are things only you can create — they
-sit under your name and carry secrets Claude must not hold. Neither blocks the
-build: the Worker reads its keys from configuration, so the code is written
-against settings and the real values arrive at deploy time in [afk-wire-up].
-
-Walkthrough:
-Steps 1 to 5 are the Discord side; steps 6 and 7 are the Cloudflare side. The
-two halves were separate `Walkthrough — ... side:` headings until 2026-08-26,
-which is why no steps ever reached a build run: the generated view a run reads
-matches a heading reading exactly `Walkthrough:`, so both blocks were dropped
-and the run halted reporting no walkthrough. One heading, same seven steps,
-nothing reworded.
-
-1. Go to discord.com/developers/applications and sign in with your Discord
-   account. You should land on a page listing applications, probably empty.
-2. Click **New Application**, top right. Name it something like `AFK sign`.
-   Accept the terms box and click **Create**. You land on the app's General
-   Information page.
-3. On that page, find **Application ID** and **Public Key**. Copy both somewhere
-   you can find again. These are not secret.
-4. In the left sidebar click **Bot**. Click **Reset Token**, confirm, and copy
-   the token that appears. This one IS secret — it is shown once and never
-   again. Do not paste it into this chat.
-5. Stop there. Do not set the Interactions Endpoint URL yet — there is nothing
-   to point it at until the Worker is deployed. That step is in [afk-wire-up].
-
-6. Go to dash.cloudflare.com and sign up, or sign in if you already have an
-   account. The free plan is enough.
-7. You are done when the Cloudflare dashboard loads and shows a **Workers &
-   Pages** entry in the left sidebar. Nothing needs creating there by hand.
-
-Tell me when both are done and whether you have the Application ID and Public
-Key to hand. Keep the bot token to yourself until [afk-wire-up] asks for it.
-
-Observable: nothing here shows up in this project's files, so this item waits
-until you say it is done.
-
 --- Cleared to run above this line ---
 
 #### [user] Deploy the Worker and connect Discord to it [afk-wire-up]
@@ -225,6 +186,32 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
+#### Last session advises processing [wire-up-blocker-unresolvable] next [forward-advisory]
+Written at the close of the session that completed [afk-accounts]. Nothing in
+Processed is cleared to run any more: the marker sits at the top, so a build or
+walk-through run would stop immediately and build nothing.
+
+What is in the way is one field. [afk-wire-up] names two blockers,
+[afk-accounts] and [register-slash-commands], and neither is in the queue: the
+first shipped this session, the second shipped on 2026-08-25. From the queue
+alone a shipped blocker and a dropped one look identical, which is exactly what
+[wire-up-blocker-unresolvable] was filed to settle. LOG records both as built,
+so the likely outcome is that the field is cleared and [afk-wire-up] lifts above
+the line — but that is a disposition, and this close does not make it.
+
+The overlap scan, run against the top processed item: [wire-up-blocker-unresolvable]
+does overlap [afk-wire-up], because it is about that item's blocker field, and
+sorting it is what releases the deploy work. The other unprocessed item,
+[bot-icon], touches nothing in Processed and blocks nothing.
+
+Two notes for whoever amends [afk-wire-up], both learned while walking
+[afk-accounts] through and recorded in that item's session entry. The user's
+Cloudflare sign-in is through GitHub, so step 2's `npx wrangler login` will send
+them through a GitHub authorisation rather than an email and password. And
+Cloudflare has regrouped its dashboard navigation, so any instruction naming a
+top-level "Workers & Pages" sidebar entry now needs the path Compute → Workers
+& Pages.
+
 #### Settle what [afk-wire-up] is really waiting on [wire-up-blocker-unresolvable]
 [afk-wire-up] carries `Blocked by: [afk-accounts], [register-slash-commands]`.
 The second slug no longer resolves: that work was built on 2026-08-25 and left
@@ -242,4 +229,32 @@ drop the slug and let the deploy walkthrough's own step 6 carry the warning it
 now has, or keep the item held and write in prose that the blocker is a run
 nobody has performed rather than work nobody has done. Noticed at the close of
 2026-08-26 during the wind-down re-scan, not directed by the user.
+
+#### Bot icon matching the house look of your other server bots [bot-icon]
+Captured by you during the [afk-accounts] walk-through. You want every bot you
+run on the server to read as one family, so this bot's Discord avatar should be
+built to the same recipe as your existing chat bot's icon rather than designed
+fresh.
+
+The recipe, read off that existing icon: a circle filling the square, a thin dark
+outline around it, and a background gradient running from deep red at the lower
+left to steel blue at the upper right, darkest through the middle. The subject
+sits on top in white line-work with no fill, centred and generously inset from
+the circle's edge.
+
+What you asked for here: take the cat drawing, make it white, and place the top
+half of it in that circle over the same gradient. The cat drawing is a solid
+filled silhouette rather than line-work, which is the one place it differs from
+the reference — whether it becomes a white silhouette or is redrawn as outline is
+the design question this item has to settle, and it is why this is not yet ready
+to build.
+
+Both source files are copied into the project so a later session does not depend
+on a folder outside it: `assets/cat-noun-project-source.svg` is the cat, and
+`assets/reference-sibling-bot-icon.png` is the existing bot's icon to copy from.
+
+The cat is a Noun Project drawing and its file carries a "Created by inmyheart /
+from Noun Project" credit baked in as text at the bottom. That credit is part of
+the licence terms, so the item has to settle where the attribution goes once the
+text is cropped out of the artwork — an avatar has nowhere to show it.
 
