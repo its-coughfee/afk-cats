@@ -1,4 +1,4 @@
-# [HASH] — Registration script written for the four slash commands; only its failure path has been run
+# ac4cbc2 — Registration script written for the four slash commands; only its failure path has been run
 
 Nothing in the project told Discord that `/afk`, `/back`, `/mysign` and `/newsign`
 exist, so a successful deploy would have produced a bot that offers nothing when

@@ -1,4 +1,4 @@
-# [HASH] — `node_modules/` and `.wrangler/` added to `.gitignore` before either folder exists
+# ac4cbc2 — `node_modules/` and `.wrangler/` added to `.gitignore` before either folder exists
 
 Built exactly as planned: two lines, nothing else touched, no git history rewritten.
 The item was placed first in the run because the account and deploy work runs an

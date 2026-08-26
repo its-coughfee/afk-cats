@@ -1,4 +1,4 @@
-# [HASH] — The bot now says "3:00 PM BST", with the zone name looked up separately from the clock
+# ac4cbc2 — The bot now says "3:00 PM BST", with the zone name looked up separately from the clock
 
 The confirmation was correct and unidiomatic: "AFK until 3:00 PM GMT+1" is not how
 a British reader writes it. The planning session had already established why a

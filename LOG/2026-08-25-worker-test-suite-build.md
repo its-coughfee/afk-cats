@@ -1,4 +1,4 @@
-# [HASH] — Worker split so Node can load it, 24 tests added, and a day-late `/afk` bug found and fixed
+# ac4cbc2 — Worker split so Node can load it, 24 tests added, and a day-late `/afk` bug found and fixed
 
 The project had tested the Worker end to end once, in a chat, and kept nothing:
 no test file, no test command, and the fake storage built for that testing thrown

@@ -20,7 +20,14 @@ sit under your name and carry secrets Claude must not hold. Neither blocks the
 build: the Worker reads its keys from configuration, so the code is written
 against settings and the real values arrive at deploy time in [afk-wire-up].
 
-Walkthrough — Discord side:
+Walkthrough:
+Steps 1 to 5 are the Discord side; steps 6 and 7 are the Cloudflare side. The
+two halves were separate `Walkthrough — ... side:` headings until 2026-08-26,
+which is why no steps ever reached a build run: the generated view a run reads
+matches a heading reading exactly `Walkthrough:`, so both blocks were dropped
+and the run halted reporting no walkthrough. One heading, same seven steps,
+nothing reworded.
+
 1. Go to discord.com/developers/applications and sign in with your Discord
    account. You should land on a page listing applications, probably empty.
 2. Click **New Application**, top right. Name it something like `AFK sign`.
@@ -34,7 +41,6 @@ Walkthrough — Discord side:
 5. Stop there. Do not set the Interactions Endpoint URL yet — there is nothing
    to point it at until the Worker is deployed. That step is in [afk-wire-up].
 
-Walkthrough — Cloudflare side:
 6. Go to dash.cloudflare.com and sign up, or sign in if you already have an
    account. The free plan is enough.
 7. You are done when the Cloudflare dashboard loads and shows a **Workers &
@@ -73,6 +79,14 @@ cannot start without. The `wrangler kv namespace create` spelling was confirmed
 against Cloudflare's docs: the colon form (`kv:namespace`) is the pre-3.60
 spelling and is what an older write-up would have suggested.
 
+Amended on 2026-08-26 with the two checks [first-deploy-checks] carried, which
+was then retired into this item: steps 5 and 6 now name what to look for, since
+the first deploy is the only thing that exercises either. The claims were read
+off `src/index.js`, `wrangler.toml` and `scripts/register-commands.mjs` rather
+than taken from the capture — the entry file does import the page as a bundled
+module, the configuration does declare the rule that makes that work, and the
+register script does read both credentials from the environment.
+
 This step needs a terminal, opened separately from any app, sitting in the
 project folder.
 
@@ -91,9 +105,19 @@ Walkthrough:
    [afk-accounts]. This one is public by nature, so it belongs in the file. The
    bot token does not go in here — or anywhere in this repo.
 5. Run `npx wrangler deploy`. It worked if the terminal prints a URL ending
-   `.workers.dev`. Note that URL down; every step below uses it.
+   `.workers.dev`. Note that URL down; every step below uses it. This is also
+   the first time anything has built `src/index.js` since [worker-test-suite]
+   split it into a thin entry file plus `src/worker.js`. That entry file pulls
+   the sign page in as a bundled module, which only a real build exercises, so
+   watch for a red error naming `afk-sign_1.html` or the import — that would
+   mean the wiring did not survive the split, and it is a defect to report
+   rather than anything you did wrong.
 6. Register the slash commands — see [register-slash-commands], which is the
-   piece of work that makes this step runnable.
+   piece of work that makes this step runnable. This is also the first time that
+   script has run with real credentials; it had only ever been run with them
+   missing, which is the path that stops early with a message. It worked if it
+   prints the four commands back. Anything else means the application id or the
+   token did not take.
 7. Back in discord.com/developers/applications, open the app, and paste
    `<your-worker-url>/interactions` into **Interactions Endpoint URL** on the
    General Information page. Click **Save Changes**. It works if the page saves
@@ -136,6 +160,19 @@ The crossfade is not here: it runs on a twenty-minute cycle, so it is noticed
 over a working day rather than watched, and it stays with the user in
 [sign-crossfade-eyeball].
 
+Why the two flip timings are measured here, folded in from [kv-read-staleness] on
+2026-08-26, which was retired into this item. Cloudflare's key-value storage
+serves reads that can be up to sixty seconds stale, so a sign page already open
+may keep showing photos for as much as a minute after `/afk` is typed, and keep
+counting for as much as a minute after `/back`. Found while reading the free-tier
+limits during the [discord-bot] build. Sixty seconds is a ceiling rather than the
+usual case, which is why this is a judgement to make from two real numbers rather
+than a fix to design in advance — and the judgement is the user's, made when this
+run reports its timings. The dead end to record so nobody walks back into it: a
+shorter poll interval buys nothing, because the staleness is in the storage and
+not in the polling, so a real fix would mean different storage or a push channel,
+and each costs something.
+
 --- Build block ---
 Changes: no project files change. The run asks the user for their sign address
 and opens it in the browser tool. Typing in Discord is the user's — Claude has no
@@ -146,8 +183,9 @@ rather than splitting into a Claude half and a user half, because the two are
 interleaved and a split would put them in separate runs. Findings are filed as
 captures like any audit's; a defect found here becomes its own item.
 Acceptance: five observations recorded — how many seconds the page took to flip
-after each of `/afk` and `/back`, which is the measurement [kv-read-staleness]
-waits on; the photo view before `/afk`; the AFK
+after each of `/afk` and `/back`, which are the two numbers the staleness
+judgement above rests on and are reported back to the user for it; the photo view
+before `/afk`; the AFK
 screen over the photos showing the right return time; the counter having turned
 around and climbing after the return time passes; the photo view again after
 `/back`. Then the user is walked through asking the bot for a fresh address, and
@@ -187,60 +225,21 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
-#### Decide whether the sign's up-to-a-minute lag behind `/afk` matters [kv-read-staleness]
-Cloudflare's key-value storage serves reads that can be up to sixty seconds
-stale, so a sign page that is already open may keep showing photos for as much as
-a minute after `/afk` is typed, and may keep counting for as much as a minute
-after `/back`. Found while reading the free-tier limits during the [discord-bot]
-build, and recorded there. It may be invisible in practice — the delay is a
-ceiling rather than the usual case — so this is a judgement to make once someone
-has watched a real sign respond, not a fix to design in advance. If it does
-matter, the fixes are real but each costs something: a shorter poll interval buys
-nothing because the staleness is in the storage rather than the poll, so the
-answer would be a different storage or a push channel.
+#### Settle what [afk-wire-up] is really waiting on [wire-up-blocker-unresolvable]
+[afk-wire-up] carries `Blocked by: [afk-accounts], [register-slash-commands]`.
+The second slug no longer resolves: that work was built on 2026-08-25 and left
+the queue, so the queue check has been flagging the reference at every session
+opening. Dropping it as resolved is the obvious move and it is not obviously
+right. LOG records that build as UNCONFIRMED — only the path where the
+credentials are missing was ever run, and the path that actually registers the
+commands has never run at all, because it needs a real Discord application that
+does not exist yet. So the honest reading is that step 6 of the deploy
+walkthrough is still waiting on something, and what it is waiting on is the
+first successful run rather than a queue item.
 
-Looked at on 2026-08-25 and deferred rather than kept: the build cannot be
-described, because what gets built depends on an answer nobody has yet. What
-settles it is a measurement, and [sign-page-browser-check] was amended to take
-it — that run now records how many seconds the page actually took to flip after
-`/afk` and after `/back`. Sixty seconds is a ceiling rather than the usual case,
-so two real numbers replace the guess. Whether the lag matters is then yours to
-judge, and this item comes back with the numbers in hand.
-
-#### Give [afk-accounts] the walkthrough it is missing [afk-accounts-walkthrough]
-The 2026-08-25 build run stopped on [afk-accounts] rather than driving it. The
-item is cleared to run and tagged as user work, but it carries no walkthrough at
-all, so there were no steps to hand over and no observable check to confirm it
-against. A run reaching it will halt the same way every time until the steps are
-written. What is needed is the actual clicking: where the Discord application is
-created, which page carries the application id, the public key and the token,
-what the Cloudflare sign-up asks for, and what the user should see when each half
-is done.
-
-#### Have [afk-wire-up] check the two things this build could not [first-deploy-checks]
-Two checks from the 2026-08-25 build could not be run and have no other home, so
-they are filed here rather than left in a log entry nobody reads at planning
-time. First, [worker-test-suite] split `src/index.js` into a thin wrapper plus
-`src/worker.js`, and nothing has built that wrapper since: the HTML import it
-still carries is a Cloudflare build feature, so only a real `wrangler` build
-proves the wiring survived the split. Second, [register-slash-commands]'s script
-was only ever run with its environment variables missing, which is the path that
-stops with a message; the success path needs a real Discord application id and
-token, which do not exist yet. Both are answered by the first deploy, so
-[afk-wire-up]'s walkthrough should name them as things to look for rather than
-leaving them to be noticed if something breaks.
-
-#### Last session advises processing [afk-accounts-walkthrough] next [forward-advisory]
-This replaces the previous note, which advised processing [ignore-build-dirs] —
-that work has since been built. The build run of 2026-08-25 shipped the four
-cleared build items and then stopped: the next item in the cleared region is
-[afk-accounts], and it carries no walkthrough, so a build run reaches it, has no
-steps to hand over, and stops there having built nothing past it. Writing those
-steps is what lets the queue move again, and everything still held below the line
-waits on the accounts existing.
-
-Nothing else waiting to be sorted overlaps that work. [first-deploy-checks] adds
-two things for [afk-wire-up]'s walkthrough to look for and does not change what
-[afk-accounts] is; [kv-read-staleness] was already deferred as undescribable
-until someone measures it.
+Two dispositions, and the choice is a fate decision rather than a tidy-up:
+drop the slug and let the deploy walkthrough's own step 6 carry the warning it
+now has, or keep the item held and write in prose that the blocker is a run
+nobody has performed rather than work nobody has done. Noticed at the close of
+2026-08-26 during the wind-down re-scan, not directed by the user.
 
