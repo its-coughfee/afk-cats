@@ -13,16 +13,40 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
---- Cleared to run above this line ---
-
 #### [user] Deploy the Worker and connect Discord to it [afk-wire-up]
 
-Blocked by: [afk-accounts], [register-slash-commands]
+Cleared on 2026-08-27, and the `Blocked by:` line dropped with both its slugs.
+That line's history, kept so nobody rebuilds it: [discord-bot] was dropped from
+it on 2026-08-25, LOG recording it built and its Worker being what this item
+deploys; [register-slash-commands] was added the same day, on the reasoning that
+step 6 could not run until that script existed.
 
-[discord-bot] was dropped from this line on 2026-08-25: LOG records it built and
-its Worker is what this item deploys, so it no longer holds anything.
-[register-slash-commands] was added the same day — step 6 cannot be run until
-that script exists.
+[afk-accounts] resolved by being completed — walked through to its end on
+2026-08-26 with every step reported done, so both accounts now exist. The
+automated queue check reports that record as a planning session's rather than a
+build's, because a walk-through's record does not carry a build's markers; the
+record itself settles it, which is why it was read rather than trusted to the
+flag.
+
+[register-slash-commands] was dropped as a circular hold rather than a resolved
+one, which is the part worth carrying. LOG records that script built but
+UNCONFIRMED: only the path where the credentials are missing has ever run. The
+only thing in existence that can confirm it is step 6 of this walkthrough, so
+holding this item against it is a loop neither side can leave — the blocker
+cannot resolve until the held item runs, and the held item cannot run until the
+blocker resolves. Nothing in the queue would ever have broken that. Step 6
+already carries the warning the hold was standing in for: it names this as the
+script's first real run, says success is the four commands printing back, and
+says anything else means the application id or the token did not take.
+
+Done knowingly against the rule that holds back work resting on a built but
+unverified foundation. The reason it is set aside here: this item *is* that
+verification, and it is a walk-through driven live with the user present rather
+than an unattended build, so a failure at step 6 is seen as it happens and
+becomes its own piece of work. The refused alternative was keeping the item held
+and writing in prose that the blocker is a run nobody has performed — it lost
+because it leaves the queue permanently stuck while describing the stuckness
+accurately.
 
 Split out of [discord-bot]. This is the step the research finding forces into
 this order: Discord validates an Interactions Endpoint URL by sending a test
@@ -55,8 +79,11 @@ Walkthrough:
 1. Run `npm install`. It downloads the Cloudflare tooling into `node_modules`.
    It worked if it ends without red error text.
 2. Run `npx wrangler login`. A browser window opens asking you to authorise
-   Wrangler against your Cloudflare account; click **Allow**. It worked when the
-   terminal says you are logged in.
+   Wrangler against your Cloudflare account; click **Allow**. Your Cloudflare
+   sign-in is through GitHub, learned while walking [afk-accounts] through, so
+   expect a GitHub authorisation screen here rather than an email and password
+   box — that is the right screen, not a wrong one. It worked when the terminal
+   says you are logged in.
 3. Run `npx wrangler kv namespace create AFK_KV`. It prints a block of
    configuration containing an `id` — a long string of letters and numbers. Copy
    that id, open `wrangler.toml`, and replace `REPLACE_WITH_KV_NAMESPACE_ID` on
@@ -97,6 +124,8 @@ Walkthrough:
 
 Observable: the bot appears in the server's member list, and `/afk` returns a
 reply rather than "application did not respond".
+
+--- Cleared to run above this line ---
 
 #### Open the live sign in a browser and check the countdown behaves [sign-page-browser-check]
 
@@ -186,50 +215,6 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
-#### Last session advises processing [wire-up-blocker-unresolvable] next [forward-advisory]
-Written at the close of the session that completed [afk-accounts]. Nothing in
-Processed is cleared to run any more: the marker sits at the top, so a build or
-walk-through run would stop immediately and build nothing.
-
-What is in the way is one field. [afk-wire-up] names two blockers,
-[afk-accounts] and [register-slash-commands], and neither is in the queue: the
-first shipped this session, the second shipped on 2026-08-25. From the queue
-alone a shipped blocker and a dropped one look identical, which is exactly what
-[wire-up-blocker-unresolvable] was filed to settle. LOG records both as built,
-so the likely outcome is that the field is cleared and [afk-wire-up] lifts above
-the line — but that is a disposition, and this close does not make it.
-
-The overlap scan, run against the top processed item: [wire-up-blocker-unresolvable]
-does overlap [afk-wire-up], because it is about that item's blocker field, and
-sorting it is what releases the deploy work. The other unprocessed item,
-[bot-icon], touches nothing in Processed and blocks nothing.
-
-Two notes for whoever amends [afk-wire-up], both learned while walking
-[afk-accounts] through and recorded in that item's session entry. The user's
-Cloudflare sign-in is through GitHub, so step 2's `npx wrangler login` will send
-them through a GitHub authorisation rather than an email and password. And
-Cloudflare has regrouped its dashboard navigation, so any instruction naming a
-top-level "Workers & Pages" sidebar entry now needs the path Compute → Workers
-& Pages.
-
-#### Settle what [afk-wire-up] is really waiting on [wire-up-blocker-unresolvable]
-[afk-wire-up] carries `Blocked by: [afk-accounts], [register-slash-commands]`.
-The second slug no longer resolves: that work was built on 2026-08-25 and left
-the queue, so the queue check has been flagging the reference at every session
-opening. Dropping it as resolved is the obvious move and it is not obviously
-right. LOG records that build as UNCONFIRMED — only the path where the
-credentials are missing was ever run, and the path that actually registers the
-commands has never run at all, because it needs a real Discord application that
-does not exist yet. So the honest reading is that step 6 of the deploy
-walkthrough is still waiting on something, and what it is waiting on is the
-first successful run rather than a queue item.
-
-Two dispositions, and the choice is a fate decision rather than a tidy-up:
-drop the slug and let the deploy walkthrough's own step 6 carry the warning it
-now has, or keep the item held and write in prose that the blocker is a run
-nobody has performed rather than work nobody has done. Noticed at the close of
-2026-08-26 during the wind-down re-scan, not directed by the user.
-
 #### Bot icon matching the house look of your other server bots [bot-icon]
 Captured by you during the [afk-accounts] walk-through. You want every bot you
 run on the server to read as one family, so this bot's Discord avatar should be
@@ -257,4 +242,32 @@ The cat is a Noun Project drawing and its file carries a "Created by inmyheart /
 from Noun Project" credit baked in as text at the bottom. That credit is part of
 the licence terms, so the item has to settle where the attribution goes once the
 text is cropped out of the artwork — an avatar has nowhere to show it.
+
+#### Report the circular-hold deadlock to the project the plugin is developed in [circular-hold-deadlock]
+Filed on 2026-08-27 during a planning run, after processing
+[wire-up-blocker-unresolvable]. Noticed by Claude, not directed by the user.
+
+The method holds back work whose foundation LOG records as built but not yet
+verified. Applied literally to [afk-wire-up], that rule would have held it
+forever: the registration script it waited on can only ever be verified by step
+6 of that same walkthrough, so the blocker cannot resolve until the held item
+runs and the held item cannot run until the blocker resolves. The queue would
+have stayed permanently stuck with nothing cleared to build.
+
+Nothing in the tooling caught it. The queue digest reported the blocker as
+absent-and-built, which reads like a resolved reference rather than an
+unresolvable one, and the planning doc's loop check only covers blockers that
+are themselves queue items — this loop runs through a verification that is not
+an item at all. It surfaced only because the LOG entry behind the slug was read
+by hand.
+
+Two things a report would carry: the shape of the case, which is a held item
+that is itself the only possible verification of what holds it; and the fact
+that the deadlock is invisible from the queue alone, so spotting it depends on
+someone reading the record.
+
+Whether this is a real gap in the method or a one-off of this project's shape is
+the open question, and it is what a planning run has to settle before anything
+is sent. Anything sent leaves this machine and needs the user's approval on the
+exact text first.
 
