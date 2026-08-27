@@ -1,4 +1,4 @@
-# [HASH] — [afk-accounts] completed: both accounts created and all seven steps walked through, with the last step corrected live because Cloudflare has regrouped its dashboard navigation
+# 9e27157 — [afk-accounts] completed: both accounts created and all seven steps walked through, with the last step corrected live because Cloudflare has regrouped its dashboard navigation
 
 The item existed because both accounts sit under the user's own name and carry
 secrets Claude must not hold. It was walked through live this session, one step
