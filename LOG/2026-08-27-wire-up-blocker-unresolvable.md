@@ -1,4 +1,4 @@
-# [HASH] — [wire-up-blocker-unresolvable] resolved and deleted: [afk-wire-up]'s two blockers dropped and the item cleared, one of them because the hold was circular rather than resolved
+# e79d07d — [wire-up-blocker-unresolvable] resolved and deleted: [afk-wire-up]'s two blockers dropped and the item cleared, one of them because the hold was circular rather than resolved
 
 The item existed because [afk-wire-up] carried `Blocked by: [afk-accounts],
 [register-slash-commands]` and neither slug resolved to anything in the queue, so

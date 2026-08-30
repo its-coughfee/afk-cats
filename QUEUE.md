@@ -13,6 +13,150 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
+#### Bot icon matching the house look of your other server bots [bot-icon]
+Captured by you during the [afk-accounts] walk-through. You want every bot you
+run on the server to read as one family, so this bot's Discord avatar is built to
+the same recipe as your existing chat bot's icon rather than designed fresh.
+
+The recipe, read off that existing icon: a circle filling the square, a thin dark
+outline around it, and a background gradient running from deep red at the lower
+left to steel blue at the upper right, darkest through the middle. The subject
+sits on top in white, centred.
+
+Both source files are copied into the project so a later session does not depend
+on a folder outside it: `assets/cat-noun-project-source.svg` is the cat, and
+`assets/reference-sibling-bot-icon.png` is the existing bot's icon to copy from.
+
+Two open questions were settled on 2026-08-30, both by looking rather than by
+reasoning.
+
+The first was silhouette or line-work. The reference icon is white line-work with
+no fill and the cat is a solid filled silhouette, so the two could not simply be
+matched. Six treatments were rendered against the real gradient and you picked
+the solid silhouette, scaled up so the drawing overflows the circle and the
+circle's own edge crops it — which is what lets the cat sit large in frame. The
+defeated option was converting the cat to line-work by tracing the edge of the
+filled artwork: it loses at small sizes, and the face details come out as thin
+doubled outlines rather than drawn strokes, so a genuine line-work version would
+mean redrawing the cat rather than converting it. Your instruction was also to
+leave the drawing's smaller pieces in place rather than removing any of them.
+
+The second was attribution. A free Noun Project download is CC BY 3.0 and obliges
+a credit wherever the artwork is used; cropping the baked-in credit text out of
+the file does not discharge it. A one-off paid download removes the obligation
+for about five dollars. You chose the free licence with the credit placed on the
+sign page, which is the one surface other people see and which already credits
+the photographers. The finding is in
+`resources/research/noun-project-icon-licence.md`.
+
+SPEC was amended in the same session: its "the photo is the point" principle now
+says the sign page carries a standing credit to the cat drawing's artist.
+
+Changes:
+- `assets/bot-icon.svg`, new. The finished avatar: a 512-unit square holding a
+  circle with the gradient above and a thin dark outline, and the white cat
+  silhouette from the source file scaled about 1.55x and clipped by the circle so
+  its lower body is cropped by the circle's edge. The source file's two `<text>`
+  elements carrying the baked-in credit are dropped from the artwork.
+- `assets/bot-icon.png`, new. A 512x512 export of that SVG, which is the file
+  Discord takes. Inkscape 1.4.4 is installed at
+  `C:\Program Files\Inkscape\bin\inkscape` and was confirmed working during
+  planning; `--export-type=png --export-width=512` does it. There is no cairosvg
+  and no ImageMagick on this machine.
+- `assets/CREDITS.md`, new. Records the CC BY 3.0 obligation and the exact credit
+  wording, citing the research file above.
+- `afk-sign_1.html`. The credit bar is the single `.attribution` element declared
+  on line 170, and line 255 rewrites its contents on every photo change, so the
+  artist credit cannot live inside it. Add a second static element beneath it
+  carrying "Cat drawing by inmyheart from Noun Project" with the artist's name
+  linked to the drawing's page, styled with the existing `.attribution` rules so
+  it matches.
+
+Reads but does not change: `assets/cat-noun-project-source.svg`,
+`assets/reference-sibling-bot-icon.png`,
+`resources/research/noun-project-icon-licence.md`, and `test/worker.test.mjs`,
+which is run rather than edited.
+
+Observable: `assets/bot-icon.png` exists and measures 512 by 512; the sign page
+opened in a browser shows the artist credit under the photo credit, in the same
+type, without covering the cat; and the existing test suite still passes.
+
+Refused: buying the royalty-free licence to avoid the credit line, which spends
+money to avoid writing one sentence on a page that already carries credits.
+Refused: converting the cat to line-work, for the reasons above.
+
+Setting the avatar in the Discord developer portal is yours rather than this
+build's, and is filed as [bot-icon-upload].
+
+#### Report the circular-hold deadlock to the project the plugin is developed in [circular-hold-deadlock]
+Filed on 2026-08-27 during a planning run, after processing
+[wire-up-blocker-unresolvable]. Noticed by Claude, not directed by the user.
+
+The method holds back work whose foundation LOG records as built but not yet
+verified. Applied literally to [afk-wire-up], that rule would have held it
+forever: the registration script it waited on can only ever be verified by step
+6 of that same walkthrough, so the blocker cannot resolve until the held item
+runs and the held item cannot run until the blocker resolves. The queue would
+have stayed permanently stuck with nothing cleared to build.
+
+Nothing in the tooling caught it. The queue digest reported the blocker as
+absent-and-built, which reads like a resolved reference rather than an
+unresolvable one, and the planning doc's loop check only covers blockers that
+are themselves queue items — this loop runs through a verification that is not
+an item at all. It surfaced only because the LOG entry behind the slug was read
+by hand.
+
+Two things a report would carry: the shape of the case, which is a held item
+that is itself the only possible verification of what holds it; and the fact
+that the deadlock is invisible from the queue alone, so spotting it depends on
+someone reading the record.
+
+Settled on 2026-08-30: this is a real gap rather than a one-off, checked against
+the version installed that day, 1.21.1-test2. The hold-back rule still reads
+"built only, not enough — keep the dependent below" with no exception for the
+case where the dependent item is itself the verification. The planning
+procedure's loop check still only covers loops made of blockers that are
+themselves queue items, and this loop runs through a verification that is not an
+item at all, so it is invisible to that check by construction. And the shape
+generalises: it is "the only thing that can exercise X is a step inside an item
+held on X", which arises whenever a build produces a script, a deploy or a
+migration whose first real run happens inside a walkthrough depending on it.
+
+The route was settled the same day. The plugin's own development project lives on
+this machine at `Prioritity projects/taskflow planning/no code method` under the
+same Desktop folder as this project — confirmed present, and confirmed to be the
+right one by the `plugin/` source folder inside it. That is where the
+walkthrough-heading report went on 2026-08-26, though that session never recorded
+the path, which is why this one had to ask for it again.
+
+Changes:
+- A new message file in that project's `INBOX/`, dated and named as coming from
+  this project, following the naming of the 2026-08-26 message recorded in
+  `INBOX/sent.md`. It carries three things: the shape of the case, which is a
+  held item that is itself the only possible verification of what holds it; the
+  fact that the deadlock cannot be seen from the queue alone, because the digest
+  reports the blocker as absent-and-built and the loop check only reaches loops
+  made of queue items; and the note that this was checked against 1.21.1-test2
+  and is not already fixed.
+- `INBOX/sent.md`, which gains its line for the send.
+- `INBOX/.address-book.md`, new, recording that project as a correspondent at the
+  path above so no later session has to ask for it.
+
+Reads but does not change: `LOG/2026-08-27-wire-up-blocker-unresolvable.md`,
+which is the record the case was found in, and [afk-wire-up]'s own entry.
+
+The run will stop and show the exact wording before delivering anything, because
+a message leaving this project needs the user's yes. That halt is expected rather
+than a fault.
+
+Observable: the message file exists in that project's `INBOX/`, `INBOX/sent.md`
+names it, and `INBOX/.address-book.md` carries the correspondent.
+
+Refused: a GitHub issue on the plugin's repository, which would publish this
+under the user's own account when nothing here needs to be public. Refused: the
+flintcraft.tech report form, which does not land in the queue that would fix it —
+where mail does both jobs.
+
 #### [user] Deploy the Worker and connect Discord to it [afk-wire-up]
 
 Cleared on 2026-08-27, and the `Blocked by:` line dropped with both its slugs.
@@ -208,6 +352,35 @@ Walkthrough:
 Observable: nothing here shows up in this project's files, so this item waits
 until you say it is done.
 
+#### [user] Set the bot's avatar in the Discord developer portal [bot-icon-upload]
+
+Blocked by: [bot-icon]
+
+Split out of [bot-icon] on 2026-08-30, because setting a bot's avatar happens in
+Discord's developer portal and nothing in this session can reach it. The build
+makes the image file; this is the one step that has to be yours.
+
+Walkthrough:
+1. Open discord.com/developers/applications and click the AFK-cats application —
+   the same one you created while walking [afk-accounts] through.
+2. In the left sidebar, click **Bot**. You are in the right place when the page
+   shows a **Username** box and, above it, a square image with the default grey
+   Discord mark in it.
+3. Click that square image. A file picker opens. Choose
+   `assets/bot-icon.png` from this project folder. It worked when the square
+   stops showing the grey default and shows the cat on the red-to-blue circle
+   instead.
+4. Scroll to the bottom and click **Save Changes**. A green bar confirms it. If
+   no Save Changes bar appeared, the image did not take — try step 3 again.
+5. In any channel on the Throughliner server, look at the bot in the member list.
+   It worked if its picture is the new icon rather than the grey default. Discord
+   caches avatars, so if it still looks old, give it a few minutes or reload
+   Discord before treating it as a failure.
+
+Observable: the bot's picture in the server's member list is the new icon. That
+is something you can see and nothing in this project's files records, so this
+item waits until you say it is done.
+
 ## Unprocessed
 
 > Captured ideas and tasks not yet fully processed. The next /plan run goes
@@ -215,59 +388,42 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
-#### Bot icon matching the house look of your other server bots [bot-icon]
-Captured by you during the [afk-accounts] walk-through. You want every bot you
-run on the server to read as one family, so this bot's Discord avatar should be
-built to the same recipe as your existing chat bot's icon rather than designed
-fresh.
+#### Preview pane cannot show a local file outside the project folder [preview-pane-outside-project]
+Filed at the 2026-08-30 close, after the session hit it repeatedly while
+settling the bot icon's design.
 
-The recipe, read off that existing icon: a circle filling the square, a thin dark
-outline around it, and a background gradient running from deep red at the lower
-left to steel blue at the upper right, darkest through the middle. The subject
-sits on top in white line-work with no fill, centred and generously inset from
-the circle's edge.
+A scratch preview page written to the session scratchpad — outside this project's
+folder — came back from the preview pane as a static snapshot with images
+blocked, and could not be screenshotted at all. So the session was building
+previews it could not see, and the user had to open them by hand in Chrome from
+a pasted file path. It cost several turns of the design discussion.
 
-What you asked for here: take the cat drawing, make it white, and place the top
-half of it in that circle over the same gradient. The cat drawing is a solid
-filled silhouette rather than line-work, which is the one place it differs from
-the reference — whether it becomes a white silhouette or is redrawn as outline is
-the design question this item has to settle, and it is why this is not yet ready
-to build.
+This is Claude Code's own preview pane rather than anything in this project or
+in the method, so the route for it, if it is worth taking, is a GitHub issue on
+the Claude Code repository — which is public under the user's own account and so
+needs their explicit yes on the exact text.
 
-Both source files are copied into the project so a later session does not depend
-on a folder outside it: `assets/cat-noun-project-source.svg` is the cat, and
-`assets/reference-sibling-bot-icon.png` is the existing bot's icon to copy from.
+What a planning run has to settle is whether it is worth reporting at all, or
+whether the workaround — writing preview files somewhere the pane can reach — is
+the whole answer.
 
-The cat is a Noun Project drawing and its file carries a "Created by inmyheart /
-from Noun Project" credit baked in as text at the bottom. That credit is part of
-the licence terms, so the item has to settle where the attribution goes once the
-text is cropped out of the artwork — an avatar has nowhere to show it.
+#### Sends leave no correspondent recorded, so the next report has to ask again [send-does-not-record-correspondent]
+Filed at the 2026-08-30 close. Noticed by Claude, not directed by the user.
 
-#### Report the circular-hold deadlock to the project the plugin is developed in [circular-hold-deadlock]
-Filed on 2026-08-27 during a planning run, after processing
-[wire-up-blocker-unresolvable]. Noticed by Claude, not directed by the user.
+A message went from this project to the project the plugin is developed in on
+2026-08-26, and `INBOX/sent.md` records it. But nothing recorded that project as
+a correspondent, so `INBOX/.address-book.md` does not exist here. When this
+session came to send a second report it had no way to find the destination and
+had to ask the user for the folder.
 
-The method holds back work whose foundation LOG records as built but not yet
-verified. Applied literally to [afk-wire-up], that rule would have held it
-forever: the registration script it waited on can only ever be verified by step
-6 of that same walkthrough, so the blocker cannot resolve until the held item
-runs and the held item cannot run until the blocker resolves. The queue would
-have stayed permanently stuck with nothing cleared to build.
+[circular-hold-deadlock]'s build creates the address book for this project, so
+the immediate problem is already handled. What is not handled is the general
+shape: a send that does not record where it sent to leaves the next send with
+nothing to look up, and the cost lands on the user as a question they have
+already answered once.
 
-Nothing in the tooling caught it. The queue digest reported the blocker as
-absent-and-built, which reads like a resolved reference rather than an
-unresolvable one, and the planning doc's loop check only covers blockers that
-are themselves queue items — this loop runs through a verification that is not
-an item at all. It surfaced only because the LOG entry behind the slug was read
-by hand.
-
-Two things a report would carry: the shape of the case, which is a held item
-that is itself the only possible verification of what holds it; and the fact
-that the deadlock is invisible from the queue alone, so spotting it depends on
-someone reading the record.
-
-Whether this is a real gap in the method or a one-off of this project's shape is
-the open question, and it is what a planning run has to settle before anything
-is sent. Anything sent leaves this machine and needs the user's approval on the
-exact text first.
+Whether that is a gap in the method's own procedure or simply a step the earlier
+session skipped is the open question, and it is what a planning run has to settle
+before anything is reported. Anything reported leaves this project and needs the
+user's approval on the exact text.
 

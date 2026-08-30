@@ -52,4 +52,6 @@ the rest.
   from Discord — there are no accounts and no sign-in on the sign itself. The only
   thing stored is who is AFK and until when.
 - **The photo is the point.** Text is placed so it doesn't sit on top of the
-  subject, and photographers are always credited.
+  subject, and photographers are always credited. The sign page also carries a
+  standing credit to the artist behind the bot's cat drawing, which is used under
+  a licence that requires one.
