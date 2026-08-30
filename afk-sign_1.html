@@ -149,6 +149,15 @@
     color: rgba(255,255,255,0.85);
     text-decoration: underline;
   }
+  /* Standing credit for the cat drawing the bot's avatar is built from. It sits
+     under the photo credit, which the script rewrites on every photo change, so
+     the photo credit is lifted clear of the bottom edge to make room. */
+  #attribution {
+    bottom: 2.1em;
+  }
+  .attribution.artist-credit {
+    bottom: 0;
+  }
 
 </style>
 </head>
@@ -168,6 +177,7 @@
 </div>
 
 <div class="attribution" id="attribution"></div>
+<div class="attribution artist-credit">Cat drawing by <a href="https://thenounproject.com/icon/cat-8273703/" target="_blank" rel="noopener">inmyheart</a> from Noun Project</div>
 
 <script>
   // ── Cat photos from Pexels ──

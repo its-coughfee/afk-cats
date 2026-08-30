@@ -13,267 +13,8 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
-#### Bot icon matching the house look of your other server bots [bot-icon]
-Captured by you during the [afk-accounts] walk-through. You want every bot you
-run on the server to read as one family, so this bot's Discord avatar is built to
-the same recipe as your existing chat bot's icon rather than designed fresh.
-
-The recipe, read off that existing icon: a circle filling the square, a thin dark
-outline around it, and a background gradient running from deep red at the lower
-left to steel blue at the upper right, darkest through the middle. The subject
-sits on top in white, centred.
-
-Both source files are copied into the project so a later session does not depend
-on a folder outside it: `assets/cat-noun-project-source.svg` is the cat, and
-`assets/reference-sibling-bot-icon.png` is the existing bot's icon to copy from.
-
-Two open questions were settled on 2026-08-30, both by looking rather than by
-reasoning.
-
-The first was silhouette or line-work. The reference icon is white line-work with
-no fill and the cat is a solid filled silhouette, so the two could not simply be
-matched. Six treatments were rendered against the real gradient and you picked
-the solid silhouette, scaled up so the drawing overflows the circle and the
-circle's own edge crops it — which is what lets the cat sit large in frame. The
-defeated option was converting the cat to line-work by tracing the edge of the
-filled artwork: it loses at small sizes, and the face details come out as thin
-doubled outlines rather than drawn strokes, so a genuine line-work version would
-mean redrawing the cat rather than converting it. Your instruction was also to
-leave the drawing's smaller pieces in place rather than removing any of them.
-
-The second was attribution. A free Noun Project download is CC BY 3.0 and obliges
-a credit wherever the artwork is used; cropping the baked-in credit text out of
-the file does not discharge it. A one-off paid download removes the obligation
-for about five dollars. You chose the free licence with the credit placed on the
-sign page, which is the one surface other people see and which already credits
-the photographers. The finding is in
-`resources/research/noun-project-icon-licence.md`.
-
-SPEC was amended in the same session: its "the photo is the point" principle now
-says the sign page carries a standing credit to the cat drawing's artist.
-
-Changes:
-- `assets/bot-icon.svg`, new. The finished avatar: a 512-unit square holding a
-  circle with the gradient above and a thin dark outline, and the white cat
-  silhouette from the source file scaled about 1.55x and clipped by the circle so
-  its lower body is cropped by the circle's edge. The source file's two `<text>`
-  elements carrying the baked-in credit are dropped from the artwork.
-- `assets/bot-icon.png`, new. A 512x512 export of that SVG, which is the file
-  Discord takes. Inkscape 1.4.4 is installed at
-  `C:\Program Files\Inkscape\bin\inkscape` and was confirmed working during
-  planning; `--export-type=png --export-width=512` does it. There is no cairosvg
-  and no ImageMagick on this machine.
-- `assets/CREDITS.md`, new. Records the CC BY 3.0 obligation and the exact credit
-  wording, citing the research file above.
-- `afk-sign_1.html`. The credit bar is the single `.attribution` element declared
-  on line 170, and line 255 rewrites its contents on every photo change, so the
-  artist credit cannot live inside it. Add a second static element beneath it
-  carrying "Cat drawing by inmyheart from Noun Project" with the artist's name
-  linked to the drawing's page, styled with the existing `.attribution` rules so
-  it matches.
-
-Reads but does not change: `assets/cat-noun-project-source.svg`,
-`assets/reference-sibling-bot-icon.png`,
-`resources/research/noun-project-icon-licence.md`, and `test/worker.test.mjs`,
-which is run rather than edited.
-
-Observable: `assets/bot-icon.png` exists and measures 512 by 512; the sign page
-opened in a browser shows the artist credit under the photo credit, in the same
-type, without covering the cat; and the existing test suite still passes.
-
-Refused: buying the royalty-free licence to avoid the credit line, which spends
-money to avoid writing one sentence on a page that already carries credits.
-Refused: converting the cat to line-work, for the reasons above.
-
-Setting the avatar in the Discord developer portal is yours rather than this
-build's, and is filed as [bot-icon-upload].
-
-#### Report the circular-hold deadlock to the project the plugin is developed in [circular-hold-deadlock]
-Filed on 2026-08-27 during a planning run, after processing
-[wire-up-blocker-unresolvable]. Noticed by Claude, not directed by the user.
-
-The method holds back work whose foundation LOG records as built but not yet
-verified. Applied literally to [afk-wire-up], that rule would have held it
-forever: the registration script it waited on can only ever be verified by step
-6 of that same walkthrough, so the blocker cannot resolve until the held item
-runs and the held item cannot run until the blocker resolves. The queue would
-have stayed permanently stuck with nothing cleared to build.
-
-Nothing in the tooling caught it. The queue digest reported the blocker as
-absent-and-built, which reads like a resolved reference rather than an
-unresolvable one, and the planning doc's loop check only covers blockers that
-are themselves queue items — this loop runs through a verification that is not
-an item at all. It surfaced only because the LOG entry behind the slug was read
-by hand.
-
-Two things a report would carry: the shape of the case, which is a held item
-that is itself the only possible verification of what holds it; and the fact
-that the deadlock is invisible from the queue alone, so spotting it depends on
-someone reading the record.
-
-Settled on 2026-08-30: this is a real gap rather than a one-off, checked against
-the version installed that day, 1.21.1-test2. The hold-back rule still reads
-"built only, not enough — keep the dependent below" with no exception for the
-case where the dependent item is itself the verification. The planning
-procedure's loop check still only covers loops made of blockers that are
-themselves queue items, and this loop runs through a verification that is not an
-item at all, so it is invisible to that check by construction. And the shape
-generalises: it is "the only thing that can exercise X is a step inside an item
-held on X", which arises whenever a build produces a script, a deploy or a
-migration whose first real run happens inside a walkthrough depending on it.
-
-The route was settled the same day. The plugin's own development project lives on
-this machine at `Prioritity projects/taskflow planning/no code method` under the
-same Desktop folder as this project — confirmed present, and confirmed to be the
-right one by the `plugin/` source folder inside it. That is where the
-walkthrough-heading report went on 2026-08-26, though that session never recorded
-the path, which is why this one had to ask for it again.
-
-Changes:
-- A new message file in that project's `INBOX/`, dated and named as coming from
-  this project, following the naming of the 2026-08-26 message recorded in
-  `INBOX/sent.md`. It carries three things: the shape of the case, which is a
-  held item that is itself the only possible verification of what holds it; the
-  fact that the deadlock cannot be seen from the queue alone, because the digest
-  reports the blocker as absent-and-built and the loop check only reaches loops
-  made of queue items; and the note that this was checked against 1.21.1-test2
-  and is not already fixed.
-- `INBOX/sent.md`, which gains its line for the send.
-- `INBOX/.address-book.md`, new, recording that project as a correspondent at the
-  path above so no later session has to ask for it.
-
-Reads but does not change: `LOG/2026-08-27-wire-up-blocker-unresolvable.md`,
-which is the record the case was found in, and [afk-wire-up]'s own entry.
-
-The run will stop and show the exact wording before delivering anything, because
-a message leaving this project needs the user's yes. That halt is expected rather
-than a fault.
-
-Observable: the message file exists in that project's `INBOX/`, `INBOX/sent.md`
-names it, and `INBOX/.address-book.md` carries the correspondent.
-
-Refused: a GitHub issue on the plugin's repository, which would publish this
-under the user's own account when nothing here needs to be public. Refused: the
-flintcraft.tech report form, which does not land in the queue that would fix it —
-where mail does both jobs.
-
-#### [user] Deploy the Worker and connect Discord to it [afk-wire-up]
-
-Cleared on 2026-08-27, and the `Blocked by:` line dropped with both its slugs.
-That line's history, kept so nobody rebuilds it: [discord-bot] was dropped from
-it on 2026-08-25, LOG recording it built and its Worker being what this item
-deploys; [register-slash-commands] was added the same day, on the reasoning that
-step 6 could not run until that script existed.
-
-[afk-accounts] resolved by being completed — walked through to its end on
-2026-08-26 with every step reported done, so both accounts now exist. The
-automated queue check reports that record as a planning session's rather than a
-build's, because a walk-through's record does not carry a build's markers; the
-record itself settles it, which is why it was read rather than trusted to the
-flag.
-
-[register-slash-commands] was dropped as a circular hold rather than a resolved
-one, which is the part worth carrying. LOG records that script built but
-UNCONFIRMED: only the path where the credentials are missing has ever run. The
-only thing in existence that can confirm it is step 6 of this walkthrough, so
-holding this item against it is a loop neither side can leave — the blocker
-cannot resolve until the held item runs, and the held item cannot run until the
-blocker resolves. Nothing in the queue would ever have broken that. Step 6
-already carries the warning the hold was standing in for: it names this as the
-script's first real run, says success is the four commands printing back, and
-says anything else means the application id or the token did not take.
-
-Done knowingly against the rule that holds back work resting on a built but
-unverified foundation. The reason it is set aside here: this item *is* that
-verification, and it is a walk-through driven live with the user present rather
-than an unattended build, so a failure at step 6 is seen as it happens and
-becomes its own piece of work. The refused alternative was keeping the item held
-and writing in prose that the blocker is a run nobody has performed — it lost
-because it leaves the queue permanently stuck while describing the stuckness
-accurately.
-
-Split out of [discord-bot]. This is the step the research finding forces into
-this order: Discord validates an Interactions Endpoint URL by sending a test
-request to it at the moment you save it, so the Worker has to be live and
-answering before the developer-portal field can be filled in. That is why this
-cannot be folded into [afk-accounts].
-
-Sharpened on 2026-08-25, which is what the item asked for once [discord-bot]
-shipped. Two things the rough version had wrong, both read off `wrangler.toml`
-rather than assumed: the Discord public key is an ordinary variable in that file,
-not a secret, and the bot token is not needed by the Worker at all — it is only
-used to register the commands. The rough version also never mentioned the KV
-namespace, which does not exist until someone creates it and which the Worker
-cannot start without. The `wrangler kv namespace create` spelling was confirmed
-against Cloudflare's docs: the colon form (`kv:namespace`) is the pre-3.60
-spelling and is what an older write-up would have suggested.
-
-Amended on 2026-08-26 with the two checks [first-deploy-checks] carried, which
-was then retired into this item: steps 5 and 6 now name what to look for, since
-the first deploy is the only thing that exercises either. The claims were read
-off `src/index.js`, `wrangler.toml` and `scripts/register-commands.mjs` rather
-than taken from the capture — the entry file does import the page as a bundled
-module, the configuration does declare the rule that makes that work, and the
-register script does read both credentials from the environment.
-
-This step needs a terminal, opened separately from any app, sitting in the
-project folder.
-
-Walkthrough:
-1. Run `npm install`. It downloads the Cloudflare tooling into `node_modules`.
-   It worked if it ends without red error text.
-2. Run `npx wrangler login`. A browser window opens asking you to authorise
-   Wrangler against your Cloudflare account; click **Allow**. Your Cloudflare
-   sign-in is through GitHub, learned while walking [afk-accounts] through, so
-   expect a GitHub authorisation screen here rather than an email and password
-   box — that is the right screen, not a wrong one. It worked when the terminal
-   says you are logged in.
-3. Run `npx wrangler kv namespace create AFK_KV`. It prints a block of
-   configuration containing an `id` — a long string of letters and numbers. Copy
-   that id, open `wrangler.toml`, and replace `REPLACE_WITH_KV_NAMESPACE_ID` on
-   line 15 with it, keeping the quotes.
-4. In the same file, replace `REPLACE_WITH_DISCORD_PUBLIC_KEY` on line 20 with
-   the Public Key you copied from the Discord developer portal in
-   [afk-accounts]. This one is public by nature, so it belongs in the file. The
-   bot token does not go in here — or anywhere in this repo.
-5. Run `npx wrangler deploy`. It worked if the terminal prints a URL ending
-   `.workers.dev`. Note that URL down; every step below uses it. This is also
-   the first time anything has built `src/index.js` since [worker-test-suite]
-   split it into a thin entry file plus `src/worker.js`. That entry file pulls
-   the sign page in as a bundled module, which only a real build exercises, so
-   watch for a red error naming `afk-sign_1.html` or the import — that would
-   mean the wiring did not survive the split, and it is a defect to report
-   rather than anything you did wrong.
-6. Register the slash commands — see [register-slash-commands], which is the
-   piece of work that makes this step runnable. This is also the first time that
-   script has run with real credentials; it had only ever been run with them
-   missing, which is the path that stops early with a message. It worked if it
-   prints the four commands back. Anything else means the application id or the
-   token did not take.
-7. Back in discord.com/developers/applications, open the app, and paste
-   `<your-worker-url>/interactions` into **Interactions Endpoint URL** on the
-   General Information page. Click **Save Changes**. It works if the page saves
-   without an error; a red error means the Worker is not answering correctly.
-8. In the same portal, open the **OAuth2** section, generate an invite link, and
-   use it to add the bot to the Throughliner server. It worked if the bot shows
-   up in the server's member list.
-9. Type `/mysign` in any channel. The bot replies privately with your sign
-   address. Open it in a browser tab and leave it open — you should see cat
-   photos. This step comes before `/afk` on purpose: the sign page is what tells
-   the bot your timezone, so a first `/afk` from someone who has never opened
-   their page is refused with a nudge to do exactly this. Ordering it the other
-   way round would have you read a correct refusal as a broken deploy.
-10. Now type `/afk 3pm`. It worked if the bot confirms the time and the tab you
-   left open turns into the AFK screen, counting down.
-
-Observable: the bot appears in the server's member list, and `/afk` returns a
-reply rather than "application did not respond".
-
---- Cleared to run above this line ---
-
 #### Open the live sign in a browser and check the countdown behaves [sign-page-browser-check]
 
-Blocked by: [afk-wire-up]
 Red flag · State: cleared
 
 Split out of [sign-page-eyeball], which was filed during the [discord-bot] build
@@ -329,32 +70,7 @@ Refused: doing the check without regenerating the address afterwards — it leav
 a working address to the user's presence sitting in a transcript.
 --- End build block ---
 
-#### [user] Watch the sign's photo crossfade over a working day [sign-crossfade-eyeball]
-
-Blocked by: [afk-wire-up]
-
-Split out of [sign-page-eyeball]. This is the half of that check that genuinely
-cannot be handed to a tool: the photos cross-fade on a twenty-minute cycle, so
-nobody sits and watches it — it is noticed over a normal day with the sign open
-in a tab. The countdown behaviour went to [sign-page-browser-check].
-
-Walkthrough:
-1. Open your sign address in a browser tab and leave it open while you work.
-   You should see a cat photo filling the screen with a photographer's name in a
-   bar at the bottom.
-2. Some time later — twenty minutes or more — glance at it. It worked if the
-   photo is a different one and the credit bar names a different photographer.
-3. Watch one changeover if you happen to catch it. It should fade from one photo
-   to the next rather than cutting, and the text should not sit on top of the
-   cat's face in either photo.
-4. Tell me what you saw. Anything wrong becomes its own piece of work.
-
-Observable: nothing here shows up in this project's files, so this item waits
-until you say it is done.
-
 #### [user] Set the bot's avatar in the Discord developer portal [bot-icon-upload]
-
-Blocked by: [bot-icon]
 
 Split out of [bot-icon] on 2026-08-30, because setting a bot's avatar happens in
 Discord's developer portal and nothing in this session can reach it. The build
@@ -381,12 +97,56 @@ Observable: the bot's picture in the server's member list is the new icon. That
 is something you can see and nothing in this project's files records, so this
 item waits until you say it is done.
 
+#### [user] Watch the sign's photo crossfade over a working day [sign-crossfade-eyeball]
+
+Split out of [sign-page-eyeball]. This is the half of that check that genuinely
+cannot be handed to a tool: the photos cross-fade on a twenty-minute cycle, so
+nobody sits and watches it — it is noticed over a normal day with the sign open
+in a tab. The countdown behaviour went to [sign-page-browser-check].
+
+Walkthrough:
+1. Open your sign address in a browser tab and leave it open while you work.
+   You should see a cat photo filling the screen with a photographer's name in a
+   bar at the bottom.
+2. Some time later — twenty minutes or more — glance at it. It worked if the
+   photo is a different one and the credit bar names a different photographer.
+3. Watch one changeover if you happen to catch it. It should fade from one photo
+   to the next rather than cutting, and the text should not sit on top of the
+   cat's face in either photo.
+4. Tell me what you saw. Anything wrong becomes its own piece of work.
+
+Observable: nothing here shows up in this project's files, so this item waits
+until you say it is done.
+
+--- Cleared to run above this line ---
+
 ## Unprocessed
 
 > Captured ideas and tasks not yet fully processed. The next /plan run goes
 > through these with you and decides each one's fate — keep it (move it up to
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
+
+#### Last session advises processing sign-cannot-show-over-focused-window next [forward-advisory]
+Advice from the 2026-08-30 build session, which deployed the bot and watched you
+use it for the first time. Read and cleared at the next planning run.
+
+Process [sign-cannot-show-over-focused-window] before the cleared work runs.
+
+The reason is an overlap rather than a preference. The top cleared item,
+[sign-page-browser-check], opens the sign in a browser and measures how it behaves.
+[sign-cannot-show-over-focused-window] asks whether a sign living in a browser tab
+is the right shape at all, given that you stream a focused window and the tab is
+therefore invisible while you work. Measuring the current sign in detail before
+that question is settled risks spending a careful check on a shape that is about
+to change — and the answer could reach SPEC's sharing sentence, which most of the
+rest of the queue is built on.
+
+Nothing else waiting overlaps with the cleared work.
+
+Also worth knowing at that planning run: all three cleared items became ready at
+this close, because the work holding them shipped and was verified. So a /next run
+would now walk straight into them.
 
 #### Preview pane cannot show a local file outside the project folder [preview-pane-outside-project]
 Filed at the 2026-08-30 close, after the session hit it repeatedly while
@@ -426,4 +186,157 @@ Whether that is a gap in the method's own procedure or simply a step the earlier
 session skipped is the open question, and it is what a planning run has to settle
 before anything is reported. Anything reported leaves this project and needs the
 user's approval on the exact text.
+
+#### Terminal walkthroughs assume you already know how to open one [walkthrough-assumes-terminal-knowledge]
+Filed on 2026-08-30 while driving [afk-wire-up]'s walkthrough. Raised by you: you
+said you do not know the terminal, and that pasting step 2's command as written
+would have run it in the wrong folder.
+
+[afk-wire-up]'s preamble says "This step needs a terminal, opened separately from
+any app, sitting in the project folder" and stops there. It never says how to open
+one, how to get it into the project folder, or what tells you that worked. Every
+command step after it silently depends on that having happened.
+
+The run supplied the missing move live — open PowerShell from the Start menu, then
+`cd` to the project folder, with the changed prompt as the thing to look for — so
+this walkthrough is unblocked. What is not settled is whether that opening move
+should be written into the item itself, and whether other terminal walkthroughs in
+this project carry the same hole.
+
+Worth weighing at planning: this may be a gap in the method's own guidance rather
+than in this one item, since it requires every step to name the thing to click and
+the thing to look for, and an unwritten prerequisite step is exactly what that
+rule is for. If it is the method's, it routes as mail rather than as a change
+here.
+
+#### Every deploy warns that the HTML text rule has no fallthrough setting [wrangler-text-rule-fallthrough]
+Filed on 2026-08-30 during [afk-wire-up]'s first real deploy. Noticed by Claude.
+
+`wrangler.toml` declares a `[[rules]]` entry making `**/*.html` a text module, which
+is what lets `afk-sign_1.html` be bundled as the one copy of the sign page. Because
+that rule sets no `fallthrough`, it silently shadows Wrangler's built-in default
+text rule, which covers `.txt`, `.html` and `.sql`. Wrangler prints a warning about
+this on every deploy.
+
+Nothing here needs the default rule, so the deploy is correct as it stands and the
+sign page bundles properly — this is noise rather than a fault. The fix is one line:
+`fallthrough = false` on the rule, which says the shadowing is deliberate and
+silences the warning. `fallthrough = true` would be wrong, since it would re-admit
+rules this project does not want.
+
+Worth doing because a warning that appears on every deploy is a warning nobody
+reads, and the next real problem will print in the same place.
+
+#### The register script documents its own invocation in a syntax that fails on this machine [register-script-bash-syntax]
+Filed on 2026-08-30 while driving [afk-wire-up] step 6. Noticed by Claude.
+
+`scripts/register-commands.mjs` carries a comment showing how to run it:
+`DISCORD_APPLICATION_ID=... DISCORD_TOKEN=... npm run register`. That is bash
+syntax. This machine's terminal is PowerShell, where an inline environment prefix
+like that is not valid and the command fails rather than running with the values
+unset — so the printed instruction is wrong for the only person who runs it.
+
+The walkthrough step was corrected live, handing over the PowerShell form
+(`$env:NAME = "value"` on its own line, then `npm run register`), which is what
+actually ran. The script's own comment is still wrong, and it is the thing anybody
+reads first when they come back to this months later.
+
+What a planning run has to settle is whether the comment should simply be rewritten
+for PowerShell, or carry both forms, given the project's own instructions say
+commands should work in PowerShell unless stated otherwise.
+
+#### Sign is a separate browser tab, so it cannot show while the stream is focused on another window [sign-cannot-show-over-focused-window]
+Captured by you on 2026-08-30, at the end of [afk-wire-up]'s walkthrough, on first
+real use of the sign.
+
+Your words for it: the sign "just opens a page which isn't going to work when I
+have the stream focused on Claude". You stream a specific window rather than the
+whole screen, so a sign living in its own browser tab is invisible to anyone
+watching for exactly as long as you are working — which is the entire time the sign
+would be worth showing.
+
+This is a hole in what SPEC assumes rather than a bug in what was built. SPEC says
+"You keep the sign open in a browser tab and share that tab", and everything from
+the private per-person address to the full-screen layout follows from that. What it
+never asks is what happens when the stream is pointed at a different window, which
+turns out to be the ordinary case for you.
+
+Nothing here is decided. What a planning run has to settle is whether the tab model
+is right and the sign is simply shared differently, or whether the sign needs a
+second shape entirely — an always-on-top window, an overlay, something the
+streaming software can take as its own source. Each of those is a different product,
+so this is a SPEC conversation before it is a build.
+
+Worth weighing early rather than filing under improvements: if the answer changes
+SPEC's sharing sentence, it changes what the rest of the queue is building toward.
+
+#### Bot says AEST but the sign says GMT+10 for the same moment [timezone-label-differs-between-bot-and-sign]
+Filed on 2026-08-30 at the end of [afk-wire-up]'s walkthrough. Noticed by Claude.
+
+Confirming `/afk 3pm`, the bot replied "AFK until 3:00 PM AEST. The sign is up."
+The sign page, showing the same moment, reads "back at 03:00 PM GMT+10". Both are
+correct and they name the same time; they just disagree about how to say it.
+
+The cause is that the page asks the browser to format the zone with the short
+style, and browsers render an Australian zone as a numeric offset rather than as
+its abbreviation, while the bot composes its own wording. So this is a formatting
+choice on the page rather than a bug in either.
+
+Cosmetic, and small. It is worth deciding rather than leaving because the sign is
+the surface other people read, and a numeric offset is the less human of the two —
+"3:00 PM AEST" is what somebody watching the stream would recognise.
+
+What a planning run has to settle is whether the sign should carry the
+abbreviation, drop the zone entirely (it is the viewer's own clock that matters
+least here — the sign is read by other people), or be left as it is.
+
+#### Steps that keep a secret out of the transcript should warn against screenshotting [screenshot-defeats-secret-keeping]
+Filed on 2026-08-30 by the re-scan, from two failures the same session. Noticed by
+Claude.
+
+Two steps in [afk-wire-up] were written so a secret never reached the chat. Step 6
+has the user paste the bot token into their own terminal and report only that it
+worked. Step 9 has them open their private sign address in a browser. Both
+precautions were defeated the same way: the user reported the step by screenshotting
+the window, and the window had the secret on it — the terminal echoes the pasted
+line, and the browser shows the address bar.
+
+Neither was a mistake anyone made. Screenshotting is the natural way to report what
+a terminal or a browser is showing, and it is the reporting method this method's
+walkthroughs implicitly invite by asking "what does it say?". So the design held and
+the reporting channel leaked, which is a gap in how walkthroughs are written rather
+than in this project.
+
+Both leaks were repaired the same session — the token reset, the sign address
+thrown away and confirmed dead — so nothing here is outstanding. What is
+outstanding is the general fix: a step that deliberately keeps something out of the
+transcript should say, in the step itself, not to screenshot the window while it is
+on screen, and should say what to type instead.
+
+This is a problem with the method rather than with this app, so the route is mail
+to the project the plugin is developed in, which
+`INBOX/.address-book.md` now records. Anything sent leaves this project and needs
+your approval on the exact text first.
+
+#### Two package install scripts are unapproved, which may block running the Worker locally [npm-install-scripts-unapproved]
+Filed on 2026-08-30 by the re-scan, from what `npm install` printed during
+[afk-wire-up] step 1. Noticed by Claude.
+
+`npm install` finished cleanly but warned that two packages have install scripts it
+has not been allowed to run: `esbuild` and `workerd`. Newer npm holds such scripts
+back by default rather than running them, and reports what it held.
+
+Nothing needed them today. `npx wrangler --version` answered, and the deploy built
+and uploaded the Worker without complaint, because deploying builds in the cloud.
+
+The reason to file it rather than forget it: `workerd` is the runtime that runs a
+Worker on this machine, and its install script is what puts the binary in place. So
+the first time anyone tries `wrangler dev` — running the bot locally to try a change
+without deploying it — this is a plausible cause of it failing, and the failure will
+look like something else entirely.
+
+What a planning run has to settle is whether to approve the two scripts now
+(`npm approve-scripts esbuild workerd`, which npm's own message suggests), or to
+leave it until something actually needs local running and treat this entry as the
+note that says where to look.
 

@@ -1,4 +1,4 @@
-# [HASH] — [circular-hold-deadlock] processed and cleared: the deadlock confirmed as a real method gap against the version now installed, and the mail route settled
+# 3927d87 — [circular-hold-deadlock] processed and cleared: the deadlock confirmed as a real method gap against the version now installed, and the mail route settled
 
 The item was filed on 2026-08-27 by Claude, not directed by the user, and it left
 one question open: is the circular hold a real gap in the method, or a one-off of

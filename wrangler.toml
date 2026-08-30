@@ -12,12 +12,12 @@ globs = ["**/*.html"]
 # Fill in `id` with the namespace created at deploy time.
 [[kv_namespaces]]
 binding = "AFK_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "70c034e84bf34c61af43c9f408d7f212"
 
 [vars]
 # Discord's public key for this application. Public by nature, so it lives here
 # rather than in a secret. The bot token is not needed by this Worker at all.
-DISCORD_PUBLIC_KEY = "REPLACE_WITH_DISCORD_PUBLIC_KEY"
+DISCORD_PUBLIC_KEY = "b562db8b826548ce8cf5f68301355762a2101b37e41152a0b966f82857ffe068"
 
 # Optional. Leave unset and sign addresses are built from the incoming request's
 # own origin, which is right in every ordinary case.
