@@ -1,4 +1,4 @@
-# ad30b96 — [sign-address-exposed-in-screenshot] done: the exposed sign address thrown away and confirmed dead by observation, which is also the first real test of SPEC's promise that a leaked address can be discarded
+# 69e18ab — [sign-address-exposed-in-screenshot] done: the exposed sign address thrown away and confirmed dead by observation, which is also the first real test of SPEC's promise that a leaked address can be discarded
 
 Filed and walked in the same session, alongside [bot-token-exposed-in-screenshot],
 which is the same failure in a different window.

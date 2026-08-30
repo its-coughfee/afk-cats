@@ -1,4 +1,4 @@
-# ad30b96 — [afk-wire-up] done: the Worker deployed, the commands registered and Discord connected, with the bot answering `/afk` in the server — and six things filed that only running it for real could find
+# 69e18ab — [afk-wire-up] done: the Worker deployed, the commands registered and Discord connected, with the bot answering `/afk` in the server — and six things filed that only running it for real could find
 
 A `[user]` item, walked live. Written as it happened; the walkthrough's ten steps
 are in QUEUE.md under the item's slug.

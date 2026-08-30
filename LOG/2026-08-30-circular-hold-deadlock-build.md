@@ -1,4 +1,4 @@
-# ad30b96 — [circular-hold-deadlock] sent: the deadlock reported to the plugin's own project, and this project's first address book written so no later session has to ask where that project is
+# 69e18ab — [circular-hold-deadlock] sent: the deadlock reported to the plugin's own project, and this project's first address book written so no later session has to ask where that project is
 
 The report exists because of what [afk-wire-up] ran into on 2026-08-27. The method
 holds back work whose foundation the record shows built but not verified. Applied

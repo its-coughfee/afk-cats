@@ -1,4 +1,4 @@
-# ad30b96 — [bot-icon] built: the avatar, its credits file, and the sign page's standing artist credit — with the item's "solid silhouette" premise found wrong about the source file and the treatment re-decided live
+# 69e18ab — [bot-icon] built: the avatar, its credits file, and the sign page's standing artist credit — with the item's "solid silhouette" premise found wrong about the source file and the treatment re-decided live
 
 The item existed because you wanted every bot you run on the server to read as one
 family, so this avatar was built to a recipe read off your existing chat bot's icon

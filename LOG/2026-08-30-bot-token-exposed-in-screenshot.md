@@ -1,4 +1,4 @@
-# ad30b96 — [bot-token-exposed-in-screenshot] done: the exposed bot token reset the same session it leaked, closing the red flag by fixing it rather than accepting it
+# 69e18ab — [bot-token-exposed-in-screenshot] done: the exposed bot token reset the same session it leaked, closing the red flag by fixing it rather than accepting it
 
 Filed and walked in the same session, which the method allows when walking an item
 now is what clears its red flag.
