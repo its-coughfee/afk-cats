@@ -13,6 +13,60 @@
 > item carrying a `Red flag · State: cleared/uncleared` marker. The line below marks
 > how far down is cleared to build; anything below it is decided but not ready yet.
 
+#### Visibility line says nothing is published, but the repository is now public [visibility-line-says-nothing-published]
+
+Red flag · State: cleared
+
+Filed on 2026-08-30, minutes after the repository was made public. Noticed by
+Claude while reporting the publication.
+
+`CLAUDE.md` line 32 reads "SPEC.md, QUEUE.md and LOG/ are all tracked in this
+project's own git repository, which has no online home — nothing is published
+anywhere." That was true until this session and is now false. It is the sentence
+every future session reads to decide how freely it can write, so a session that
+believes nothing is published will put working detail into the queue and the logs
+without a second thought, and all of it reaches a public repository on the next
+push. The scrub that ran before publishing found a personal account handle sitting
+in a log entry, which is exactly what a session writing in private produces.
+
+The risk clears two ways at once. It is designed out for future sessions by
+making the instruction true, and the residual — everything already pushed is
+public permanently, including the two records of the bot token and sign address
+leaking in screenshots — is the user's knowingly: they were told what the history
+contained and what publishing exposes, and chose to proceed.
+
+`INBOX/` is gitignored, so the correspondence register and the two reports sent
+from here have never left the machine. That exception is written into the new
+line rather than left to be rediscovered, because a session that does not know it
+will avoid writing correspondence detail it could safely write.
+
+The user's decision that the documents stay public was made on its own reasoning
+rather than by default: the GitHub issue filed the same day states publicly that
+this repository's queue and logs are readable if the state of the project is
+useful to Discord, so withdrawing them would contradict a page that cannot be
+quietly edited.
+
+--- Build block ---
+Changes: `CLAUDE.md` only, the Visibility line beneath the `## Visibility`
+heading. Rewrite it to say that SPEC.md, QUEUE.md and LOG/ are tracked in a
+public repository at github.com/its-coughfee/afk-cats, that anything written into
+them is world-readable from the next push, and that `INBOX/` is gitignored and
+stays local. Leave the HTML comment above it as it is.
+Reads but does not change: `.gitignore`, to confirm `INBOX/` is still the only
+project document folder excluded before the line claims it.
+Acceptance: a search of the project for "no online home" returns nothing, and the
+Visibility section names the public address and the INBOX exception.
+Red flag: cleared
+Rule gate: not needed — the gate belongs to projects that host the method's own
+rules, and this project's CLAUDE.md carries no rule-gate instruction (its Project
+rules section is empty). The edit replaces a false statement of fact about where
+these documents live; it authors no standing rule and changes no behaviour.
+Refused: untracking SPEC.md, QUEUE.md and LOG/ so future writes stay private —
+it protects only writes made from now on, because nothing already pushed can be
+recalled, and it would contradict the public issue that offers the queue and logs
+to Discord as evidence.
+--- End build block ---
+
 #### Open the live sign in a browser and check the countdown behaves [sign-page-browser-check]
 
 Red flag · State: cleared
@@ -127,26 +181,73 @@ until you say it is done.
 > Processed) or drop it. Each is filed as its own `#### ` heading, so the list shows
 > up in an editor's outline.
 
-#### Last session advises processing sign-cannot-show-over-focused-window next [forward-advisory]
-Advice from the 2026-08-30 build session, which deployed the bot and watched you
-use it for the first time. Read and cleared at the next planning run.
+#### Last session advises processing hold-scope-unanswered next [forward-advisory]
+Advice from the 2026-08-30 planning chat, which published this project's
+repository, put its blocking problem to Discord twice, and closed on a decision to
+stop. Read and cleared at the next planning run.
 
-Process [sign-cannot-show-over-focused-window] before the cleared work runs.
+Process [hold-scope-unanswered] before anything else, including before a /next
+run. The user decided the project is on hold until Discord can show something over
+a stream, and how far that reaches was asked and never answered. The readiness
+line was left where it stood, so four items are still cleared and a /next run
+would build them as though nothing had been decided. That is the one thing in this
+queue that can go wrong on its own.
 
-The reason is an overlap rather than a preference. The top cleared item,
-[sign-page-browser-check], opens the sign in a browser and measures how it behaves.
-[sign-cannot-show-over-focused-window] asks whether a sign living in a browser tab
-is the right shape at all, given that you stream a focused window and the tab is
-therefore invisible while you work. Measuring the current sign in detail before
-that question is settled risks spending a careful check on a shape that is about
-to change — and the answer could reach SPEC's sharing sentence, which most of the
-rest of the queue is built on.
+The overlap worth knowing at that run. The top cleared item,
+[visibility-line-says-nothing-published], writes this repository's public address
+into CLAUDE.md. Two of the captures filed at this close bear on that address:
+[repo-account-mismatch] asks whether the repository is on the right GitHub account
+at all, and moving it would change the address; [repo-has-no-readme] concerns the
+same repository. Settling the account question first would stop the visibility fix
+writing an address that is about to change.
 
 Nothing else waiting overlaps with the cleared work.
 
-Also worth knowing at that planning run: all three cleared items became ready at
-this close, because the work holding them shipped and was verified. So a /next run
-would now walk straight into them.
+#### Sign is a separate browser tab, so it cannot show while the stream is focused on another window [sign-cannot-show-over-focused-window]
+Captured by you on 2026-08-30, at the end of [afk-wire-up]'s walkthrough, on first
+real use of the sign.
+
+Your words for it: the sign "just opens a page which isn't going to work when I
+have the stream focused on Claude". You stream a specific window rather than the
+whole screen, so a sign living in its own browser tab is invisible to anyone
+watching for exactly as long as you are working — which is the entire time the sign
+would be worth showing.
+
+This is a hole in what SPEC assumes rather than a bug in what was built. SPEC says
+"You keep the sign open in a browser tab and share that tab", and everything from
+the private per-person address to the full-screen layout follows from that. What it
+never asks is what happens when the stream is pointed at a different window, which
+turns out to be the ordinary case for you.
+
+Nothing here is decided. What a planning run has to settle is whether the tab model
+is right and the sign is simply shared differently, or whether the sign needs a
+second shape entirely — an always-on-top window, an overlay, something the
+streaming software can take as its own source. Each of those is a different product,
+so this is a SPEC conversation before it is a build.
+
+Worth weighing early rather than filing under improvements: if the answer changes
+SPEC's sharing sentence, it changes what the rest of the queue is building toward.
+
+Interviewed on 2026-08-30 and not disposed of, because the user's decision at the
+end of that chat was to stop rather than to choose between the shapes on offer.
+What the interview established, so the next planning run starts from it rather
+than repeating it. Discord's application share captures one window's own surface,
+so no overlay reaches it, and Discord offers a bot nothing that draws over a
+stream at all — the research is filed at
+`resources/research/discord-cannot-overlay-a-stream.md`. Switching which window
+Go Live shares was proposed and refused by the user, whose reason was that they
+stream a single application deliberately and a route reopening the share picker
+several times a day puts "share entire screen" under the cursor as a habit. That
+left OBS compositing, which crosses SPEC's nothing-to-install principle, and
+accepting the sign as a page people open rather than something in the stream.
+
+The user's decision, in their words: the project is "terminated until the issue
+gets solved" — the issue being Discord's inability to show anything over a
+stream. The request is on record with Discord as a Discussion, filed the same day
+after an issue on the same repository was closed as misfiled; `INBOX/sent.md`
+carries both. Nothing else was chosen, so this item names no build and stays in
+Unprocessed. How far the hold reaches across the rest of the queue was asked and
+not answered, and is carried by [hold-scope-unanswered].
 
 #### Preview pane cannot show a local file outside the project folder [preview-pane-outside-project]
 Filed at the 2026-08-30 close, after the session hit it repeatedly while
@@ -245,31 +346,6 @@ What a planning run has to settle is whether the comment should simply be rewrit
 for PowerShell, or carry both forms, given the project's own instructions say
 commands should work in PowerShell unless stated otherwise.
 
-#### Sign is a separate browser tab, so it cannot show while the stream is focused on another window [sign-cannot-show-over-focused-window]
-Captured by you on 2026-08-30, at the end of [afk-wire-up]'s walkthrough, on first
-real use of the sign.
-
-Your words for it: the sign "just opens a page which isn't going to work when I
-have the stream focused on Claude". You stream a specific window rather than the
-whole screen, so a sign living in its own browser tab is invisible to anyone
-watching for exactly as long as you are working — which is the entire time the sign
-would be worth showing.
-
-This is a hole in what SPEC assumes rather than a bug in what was built. SPEC says
-"You keep the sign open in a browser tab and share that tab", and everything from
-the private per-person address to the full-screen layout follows from that. What it
-never asks is what happens when the stream is pointed at a different window, which
-turns out to be the ordinary case for you.
-
-Nothing here is decided. What a planning run has to settle is whether the tab model
-is right and the sign is simply shared differently, or whether the sign needs a
-second shape entirely — an always-on-top window, an overlay, something the
-streaming software can take as its own source. Each of those is a different product,
-so this is a SPEC conversation before it is a build.
-
-Worth weighing early rather than filing under improvements: if the answer changes
-SPEC's sharing sentence, it changes what the rest of the queue is building toward.
-
 #### Bot says AEST but the sign says GMT+10 for the same moment [timezone-label-differs-between-bot-and-sign]
 Filed on 2026-08-30 at the end of [afk-wire-up]'s walkthrough. Noticed by Claude.
 
@@ -339,4 +415,60 @@ What a planning run has to settle is whether to approve the two scripts now
 (`npm approve-scripts esbuild workerd`, which npm's own message suggests), or to
 leave it until something actually needs local running and treat this entry as the
 note that says where to look.
+
+#### Hold's scope is unanswered — whole queue, or only the sign-shape work? [hold-scope-unanswered]
+Captured by you on 2026-08-30, from the decision you gave at the end of the
+planning chat. Filed at that chat's close, after this project's own commit.
+
+You said the project is terminated until Discord provides a way to show the sign
+over a stream. The question put back to you, and never answered before the chat
+closed, was how far that reaches. Four items are cleared to run and eight
+captures are waiting, and several of them have nothing to do with the sign's
+shape: the deploy warning about the HTML text rule, the register script's
+PowerShell syntax, the bot's avatar upload, the timezone label on the sign, the
+unapproved npm install scripts.
+
+This matters immediately rather than eventually, because the readiness line was
+left where it stands. So a /next run started before this is answered would build
+the four cleared items as though nothing had been decided.
+
+The two shapes to choose between: everything stops, and the readiness line moves
+to the top of Processed so nothing is buildable; or only work whose premise is
+the sign's current shape stops, and the small independent fixes carry on.
+
+#### Repository published under one GitHub account while commits are authored as another [repo-account-mismatch]
+Filed on 2026-08-30 at the planning chat's close. Noticed by Claude, raised with
+you in the chat and left unsettled.
+
+The repository was created at github.com/its-coughfee/afk-cats, because that is
+the account the GitHub command-line tool is signed in as. Every commit in it is
+authored as FlintCraftTech, through that account's no-reply address. So the
+project's public home and its commit history name two different accounts.
+
+Two public pages now point at the its-coughfee address: the closed issue on
+Discord's API repository, and the Discussion that replaced it. Moving the
+repository would break both links unless the redirect GitHub leaves behind is
+relied on, and that redirect is real but silent.
+
+What a planning run has to settle is whether its-coughfee is the intended home.
+If it is, nothing needs doing and this item is deleted. If it is not, the move
+is a [user] step — transferring a repository happens in GitHub's own settings and
+needs the account password — and the two public links want checking afterwards.
+
+#### Public repository has no README, so arrivals from the Discussion land on a bare file listing [repo-has-no-readme]
+Filed on 2026-08-30 at the planning chat's close. Noticed by Claude.
+
+The Discussion posted on Discord's API repository names this project as the
+concrete case and links to it. Anyone following that link reaches a repository
+with no README: a file listing, a wrangler config, a queue and a folder of
+session records, and nothing saying what the project is or why it exists.
+
+SPEC.md already says what the project is, in language written for a reader.
+So the work is small — a README carrying the shape of it, and a line pointing at
+the Discussion for why development stopped.
+
+Worth weighing against the hold: if the whole project is stopped, a README for
+visitors the Discussion sends may still be worth doing, because it is the only
+thing making the linked evidence readable. That is a judgement for a planning
+run rather than something this capture settles.
 
